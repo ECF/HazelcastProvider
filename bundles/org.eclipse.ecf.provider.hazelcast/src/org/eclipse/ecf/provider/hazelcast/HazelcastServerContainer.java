@@ -34,7 +34,7 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 
 	protected static final String[] hazelcastIntents = { "HAZELCAST" };
 
-	protected static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
+	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
 
 	public static class HazelcastServerContainerInstantiator extends GenericContainerInstantiator {
 		private JMSID getJMSIDFromParameter(Object p) {
