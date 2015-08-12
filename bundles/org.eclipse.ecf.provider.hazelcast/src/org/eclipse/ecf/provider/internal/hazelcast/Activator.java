@@ -10,8 +10,8 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.util.AdapterManagerTracker;
 import org.eclipse.ecf.core.util.ExtensionRegistryRunnable;
-import org.eclipse.ecf.provider.hazelcast.HazelcastClientContainer;
-import org.eclipse.ecf.provider.hazelcast.HazelcastServerContainer;
+import org.eclipse.ecf.provider.hazelcast.HazelcastMemberContainer;
+import org.eclipse.ecf.provider.hazelcast.HazelcastManagerContainer;
 import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -35,16 +35,16 @@ public class Activator implements BundleActivator {
 		this.context = context1;
 		SafeRunner.run(new ExtensionRegistryRunnable(this.context) {
 			protected void runWithoutRegistry() throws Exception {
-				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(HazelcastServerContainer.HAZELCAST_MANAGER_NAME, new HazelcastServerContainer.HazelcastServerContainerInstantiator(), "ECF Hazelcast Manager", true, false), null); //$NON-NLS-1$
-				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(HazelcastClientContainer.HAZELCAST_CLIENT_NAME, new HazelcastClientContainer.HazelcastClientContainerInstantiator(), "ECF Hazelcast Client", false, true), null); //$NON-NLS-1$
+				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(HazelcastManagerContainer.HAZELCAST_MANAGER_NAME, new HazelcastManagerContainer.HazelcastServerContainerInstantiator(), "ECF Hazelcast Manager", true, false), null); //$NON-NLS-1$
+				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME, new HazelcastMemberContainer.HazelcastClientContainerInstantiator(), "ECF Hazelcast Client", false, true), null); //$NON-NLS-1$
 				IAdapterManager am = getAdapterManager(context1);
 				if (am != null) {
 					rscAdapterFactories = new ArrayList<IAdapterFactory>();
 					IAdapterFactory af = new RemoteServiceContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.hazelcast.HazelcastClientContainer.class);
+					am.registerAdapters(af, org.eclipse.ecf.provider.hazelcast.HazelcastMemberContainer.class);
 					rscAdapterFactories.add(af);
 					af = new RemoteServiceContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.hazelcast.HazelcastServerContainer.class);
+					am.registerAdapters(af, org.eclipse.ecf.provider.hazelcast.HazelcastManagerContainer.class);
 					rscAdapterFactories.add(af);
 				}
 			}

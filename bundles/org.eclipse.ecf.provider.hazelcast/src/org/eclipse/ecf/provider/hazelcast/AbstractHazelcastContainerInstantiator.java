@@ -90,7 +90,7 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 			if (id == null)
 				id = getJMSIDFromParameter(UUID.randomUUID().toString());
 			if (ka == null)
-				ka = new Integer(HazelcastServerContainer.DEFAULT_KEEPALIVE);
+				ka = new Integer(HazelcastManagerContainer.DEFAULT_KEEPALIVE);
 			return createHazelcastContainer(id, ka, props, config);
 		} catch (Exception e) {
 			ContainerCreateException t = new ContainerCreateException("Exception creating activemq client container",

@@ -27,7 +27,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
-public class HazelcastServerContainer extends AbstractJMSServer {
+public class HazelcastManagerContainer extends AbstractJMSServer {
 
 	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
 
@@ -55,7 +55,7 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 				}
 				if (ka == null)
 					ka = new Integer(DEFAULT_KEEPALIVE);
-				HazelcastServerContainer server = new HazelcastServerContainer(
+				HazelcastManagerContainer server = new HazelcastManagerContainer(
 						new JMSContainerConfig(serverID, ka.intValue(), props), Hazelcast.newHazelcastInstance());
 				server.start();
 				return server;
@@ -69,7 +69,7 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 			List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 			// For a manager, if a client is exporter then we are an importer
 			if (HAZELCAST_MANAGER_NAME.equals(description.getName())) {
-				if (supportedConfigs.contains(HazelcastClientContainer.HAZELCAST_CLIENT_NAME))
+				if (supportedConfigs.contains(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME))
 					results.add(HAZELCAST_MANAGER_NAME);
 			}
 			if (results.size() == 0)
@@ -84,7 +84,7 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 		@Override
 		protected IContainer createHazelcastContainer(JMSID serverID, Integer ka,
 				@SuppressWarnings("rawtypes") Map props, Config config) throws Exception {
-			HazelcastServerContainer sc = new HazelcastServerContainer(
+			HazelcastManagerContainer sc = new HazelcastManagerContainer(
 					new JMSContainerConfig(serverID, ka.intValue(), props),
 					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
 			sc.start();
@@ -95,14 +95,14 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 
 	private final HazelcastInstance hazelcast;
 
-	public HazelcastServerContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
+	public HazelcastManagerContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
 		super(config);
 		this.hazelcast = hazelcast;
 	}
 
 	@Override
 	public void start() throws ECFException {
-		final ISynchAsynchConnection connection = new HazelcastServerChannel(this.getReceiver(), this.hazelcast);
+		final ISynchAsynchConnection connection = new HazelcastManagerChannel(this.getReceiver(), this.hazelcast);
 		setConnection(connection);
 		connection.start();
 	}

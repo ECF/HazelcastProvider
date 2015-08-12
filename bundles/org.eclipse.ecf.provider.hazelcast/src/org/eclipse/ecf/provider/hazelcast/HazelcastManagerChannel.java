@@ -24,13 +24,13 @@ import org.eclipse.ecf.provider.jms.identity.JMSID;
 
 import com.hazelcast.core.HazelcastInstance;
 
-public class HazelcastServerChannel extends AbstractJMSServerChannel {
+public class HazelcastManagerChannel extends AbstractJMSServerChannel {
 
 	private static final long serialVersionUID = 6598998936222020495L;
 
 	private final HazelcastChannel channel;
 
-	public HazelcastServerChannel(ISynchAsynchEventHandler handler, HazelcastInstance hazelcast) throws ECFException {
+	public HazelcastManagerChannel(ISynchAsynchEventHandler handler, HazelcastInstance hazelcast) throws ECFException {
 		super(handler, 30000);
 		this.channel = new HazelcastChannel(new HazelcastMessageHandler() {
 			@Override
