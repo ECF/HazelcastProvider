@@ -22,6 +22,7 @@ import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 
+import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -38,7 +39,7 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 			// For a manager, if a client is exporter then we are an importer
 			if (HAZELCAST_MANAGER_NAME.equals(description.getName())) {
 				if (supportedConfigs.contains(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME)
-						)
+						|| supportedConfigs.contains(HazelcastClientContainer.HAZELCAST_CLIENT_NAME))
 					results.add(HAZELCAST_MANAGER_NAME);
 			}
 			if (results.size() == 0)
@@ -52,7 +53,7 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 
 		@Override
 		protected IContainer createHazelcastContainer(JMSID serverID, Integer ka,
-				@SuppressWarnings("rawtypes") Map props, Config config) throws Exception {
+				@SuppressWarnings("rawtypes") Map props, Config config, ClientConfig clientConfig) throws Exception {
 			HazelcastManagerContainer sc = new HazelcastManagerContainer(
 					new JMSContainerConfig(serverID, ka.intValue(), props),
 					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
