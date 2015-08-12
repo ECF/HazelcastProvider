@@ -6,7 +6,9 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %bundle.provider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: org.eclipse.ecf.provider.internal.hazelcast.Activator
-Import-Package: com.hazelcast.config;version="3.5.1",
+Import-Package: com.hazelcast.client;version="3.5.1",
+ com.hazelcast.client.config;version="3.5.1",
+ com.hazelcast.config;version="3.5.1",
  com.hazelcast.core;version="3.5.1",
  javax.jms;version="1.1.0",
  org.eclipse.ecf.core.sharedobject;version="2.3.0",
