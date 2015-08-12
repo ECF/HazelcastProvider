@@ -17,35 +17,20 @@ import java.util.Map;
 import org.eclipse.ecf.core.ContainerCreateException;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
-import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
-import org.eclipse.ecf.provider.generic.GenericContainerInstantiator;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
-import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
+
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 
 public class HazelcastServerContainer extends AbstractJMSServer {
 
-	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/exampleTopic";
-
-	public static final String ID_PARAM = "id";
-
-	protected static final String[] hazelcastIntents = { "HAZELCAST" };
-
 	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
 
-	public static class HazelcastServerContainerInstantiator extends GenericContainerInstantiator {
-		private JMSID getJMSIDFromParameter(Object p) {
-			if (p instanceof String) {
-				return (JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME, (String) p);
-			} else if (p instanceof JMSID) {
-				return (JMSID) p;
-			} else
-				return (JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME, DEFAULT_SERVER_ID);
-		}
-
+	public static class HazelcastServerContainerInstantiator extends AbstractHazelcastContainerInstantiator {
 		@SuppressWarnings("rawtypes")
 		public IContainer createInstance(ContainerTypeDescription description, Object[] args)
 				throws ContainerCreateException {
@@ -70,23 +55,12 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 				if (ka == null)
 					ka = new Integer(DEFAULT_KEEPALIVE);
 				HazelcastServerContainer server = new HazelcastServerContainer(
-						new JMSContainerConfig(serverID, ka.intValue(), props), null);
+						new JMSContainerConfig(serverID, ka.intValue(), props), Hazelcast.newHazelcastInstance());
 				server.start();
 				return server;
 			} catch (Exception e) {
 				throw new ContainerCreateException("Exception creating activemq server container", e);
 			}
-		}
-
-		public String[] getSupportedIntents(ContainerTypeDescription description) {
-			List<String> results = new ArrayList<String>();
-			for (int i = 0; i < genericProviderIntents.length; i++) {
-				results.add(genericProviderIntents[i]);
-			}
-			for (int i = 0; i < hazelcastIntents.length; i++) {
-				results.add(hazelcastIntents[i]);
-			}
-			return (String[]) results.toArray(new String[] {});
 		}
 
 		public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
@@ -106,6 +80,30 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 			return new String[] { HAZELCAST_MANAGER_NAME };
 		}
 
+		@Override
+		protected IContainer createContainer(JMSID serverID, Integer ka, @SuppressWarnings("rawtypes") Map props)
+				throws Exception {
+			HazelcastServerContainer sc = new HazelcastServerContainer(
+					new JMSContainerConfig(serverID, ka.intValue(), props), Hazelcast.newHazelcastInstance());
+			;
+			sc.start();
+			return sc;
+		}
+
+	}
+
+	private final HazelcastInstance hazelcast;
+
+	public HazelcastServerContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
+		super(config);
+		this.hazelcast = hazelcast;
+	}
+
+	@Override
+	public void start() throws ECFException {
+		final ISynchAsynchConnection connection = new HazelcastServerChannel(this.getReceiver(), this.hazelcast);
+		setConnection(connection);
+		connection.start();
 	}
 
 	@Override
@@ -115,20 +113,6 @@ public class HazelcastServerContainer extends AbstractJMSServer {
 		if (conn != null)
 			conn.disconnect();
 		setConnection(null);
-	}
-
-	private Map<String, ?> options;
-
-	public HazelcastServerContainer(JMSContainerConfig config, Map<String, ?> options) {
-		super(config);
-		this.options = options;
-	}
-
-	@Override
-	public void start() throws ECFException {
-		final ISynchAsynchConnection connection = new HazelcastServerChannel(this.getReceiver(), this.options);
-		setConnection(connection);
-		connection.start();
 	}
 
 }
