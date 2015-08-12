@@ -16,7 +16,7 @@ public interface Hazelcast {
 	public static final String CLIENT_CONTAINER_NAME = "ecf.jms.hazelcast.member";
 	public static final String SERVER_CONTAINER_NAME = "ecf.jms.hazelcast.manager";
 	public static final String TARGET_NAME = System.getProperty("org.eclipse.ecf.tests.provider.hazelcast",
-			"hazelcast://localhost/exampleTopic");
+			"hazelcast:///exampleTopic");
 	public static final String NAMESPACE_NAME = "ecf.namespace.jmsid";
 
 }
