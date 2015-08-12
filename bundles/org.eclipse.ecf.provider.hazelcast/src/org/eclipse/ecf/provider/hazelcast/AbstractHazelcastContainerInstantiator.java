@@ -1,5 +1,7 @@
 package org.eclipse.ecf.provider.hazelcast;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +15,17 @@ import org.eclipse.ecf.provider.generic.GenericContainerInstantiator;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 
+import com.hazelcast.config.Config;
+import com.hazelcast.config.InMemoryXmlConfig;
+import com.hazelcast.config.UrlXmlConfig;
+import com.hazelcast.config.XmlConfigBuilder;
+
 public abstract class AbstractHazelcastContainerInstantiator extends GenericContainerInstantiator {
 	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/exampleTopic";
 
 	public static final String ID_PARAM = "id";
 	public static final String KEEPALIVE_PARAM = "keepAlive";
+	public static final String CONFIG_PARAM = "hazelcastConfig";
 
 	protected static final String[] hazelcastIntents = { "HAZELCAST" };
 
@@ -39,6 +47,18 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 		return (String[]) results.toArray(new String[] {});
 	}
 
+	protected Config getConfigFromArg(Object o) throws Exception {
+		if (o instanceof Config)
+			return (Config) o;
+		else if (o instanceof InputStream)
+			return new XmlConfigBuilder((InputStream) o).build();
+		else if (o instanceof URL)
+			return new UrlXmlConfig((URL) o);
+		else if (o instanceof String)
+			return new InMemoryXmlConfig((String) o);
+		return null;
+	}
+
 	@SuppressWarnings("rawtypes")
 	public IContainer createInstance(ContainerTypeDescription description, Object[] args)
 			throws ContainerCreateException {
@@ -46,6 +66,7 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 			JMSID id = null;
 			Integer ka = null;
 			Map props = null;
+			Config config = null;
 			if (args == null)
 				id = getJMSIDFromParameter(UUID.randomUUID().toString());
 			else if (args.length > 0) {
@@ -57,6 +78,9 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 					o = props.get(KEEPALIVE_PARAM);
 					if (o != null)
 						ka = getIntegerFromArg(o);
+					o = props.get(CONFIG_PARAM);
+					if (o != null)
+						config = getConfigFromArg(o);
 				} else {
 					id = getJMSIDFromParameter(args[0]);
 					if (args.length > 1)
@@ -67,7 +91,7 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 				id = getJMSIDFromParameter(UUID.randomUUID().toString());
 			if (ka == null)
 				ka = new Integer(HazelcastServerContainer.DEFAULT_KEEPALIVE);
-			return createContainer(id, ka, props);
+			return createHazelcastContainer(id, ka, props, config);
 		} catch (Exception e) {
 			ContainerCreateException t = new ContainerCreateException("Exception creating activemq client container",
 					e);
@@ -76,6 +100,6 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 		}
 	}
 
-	protected abstract IContainer createContainer(JMSID id, Integer ka, @SuppressWarnings("rawtypes") Map props)
-			throws Exception;
+	protected abstract IContainer createHazelcastContainer(JMSID id, Integer ka,
+			@SuppressWarnings("rawtypes") Map props, Config config) throws Exception;
 }

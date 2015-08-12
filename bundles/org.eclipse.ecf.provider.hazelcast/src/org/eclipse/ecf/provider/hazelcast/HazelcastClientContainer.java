@@ -23,6 +23,7 @@ import org.eclipse.ecf.provider.jms.container.AbstractJMSClient;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 
+import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
@@ -54,10 +55,10 @@ public class HazelcastClientContainer extends AbstractJMSClient {
 		}
 
 		@Override
-		protected IContainer createContainer(JMSID clientID, Integer ka, @SuppressWarnings("rawtypes") Map props)
-				throws Exception {
-			return new HazelcastClientContainer(new JMSContainerConfig(clientID, ka, props),
-					Hazelcast.newHazelcastInstance());
+		protected IContainer createHazelcastContainer(JMSID id, Integer ka, @SuppressWarnings("rawtypes") Map props,
+				Config config) throws Exception {
+			return new HazelcastClientContainer(new JMSContainerConfig(id, ka, props),
+					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
 		}
 	}
 
