@@ -30,7 +30,8 @@ import com.hazelcast.core.HazelcastInstance;
 public class HazelcastMemberContainer extends AbstractJMSClient {
 
 	public static final String HAZELCAST_MEMBER_NAME = "ecf.jms.hazelcast.member";
-
+	public static final String HAZELCAST_MEMBER_CONFIG_PARAM = "hazelcastMemberConfig";
+	
 	public static class HazelcastMemberContainerInstantiator extends AbstractHazelcastContainerInstantiator {
 
 		public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
@@ -60,6 +61,11 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 				Config config) throws Exception {
 			return new HazelcastMemberContainer(new JMSContainerConfig(id, ka, props),
 					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
+		}
+
+		@Override
+		protected String getHazelcastConfigParam() {
+			return HAZELCAST_MEMBER_CONFIG_PARAM;
 		}
 	}
 

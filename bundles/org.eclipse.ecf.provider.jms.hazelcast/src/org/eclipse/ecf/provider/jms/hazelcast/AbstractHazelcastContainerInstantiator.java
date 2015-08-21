@@ -35,7 +35,6 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 
 	public static final String ID_PARAM = "id";
 	public static final String KEEPALIVE_PARAM = "keepAlive";
-	public static final String CONFIG_PARAM = "hazelcastConfig";
 
 	protected static final String[] hazelcastIntents = { "HAZELCAST" };
 
@@ -69,6 +68,8 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 		return null;
 	}
 
+	protected abstract String getHazelcastConfigParam();
+
 	@SuppressWarnings("rawtypes")
 	public IContainer createInstance(ContainerTypeDescription description, Object[] args)
 			throws ContainerCreateException {
@@ -88,9 +89,12 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 					o = props.get(KEEPALIVE_PARAM);
 					if (o != null)
 						ka = getIntegerFromArg(o);
-					o = props.get(CONFIG_PARAM);
-					if (o != null)
-						config = getConfigFromArg(o);
+					String configParam = getHazelcastConfigParam();
+					if (configParam != null) {
+						o = props.get(configParam);
+						if (o != null)
+							config = getConfigFromArg(o);
+					}
 				} else {
 					id = getJMSIDFromParameter(args[0]);
 					if (args.length > 1)
@@ -103,8 +107,7 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 				ka = new Integer(HazelcastManagerContainer.DEFAULT_KEEPALIVE);
 			return createHazelcastContainer(id, ka, props, config);
 		} catch (Exception e) {
-			ContainerCreateException t = new ContainerCreateException("Exception creating hazelcast container",
-					e);
+			ContainerCreateException t = new ContainerCreateException("Exception creating hazelcast container", e);
 			t.setStackTrace(e.getStackTrace());
 			throw t;
 		}

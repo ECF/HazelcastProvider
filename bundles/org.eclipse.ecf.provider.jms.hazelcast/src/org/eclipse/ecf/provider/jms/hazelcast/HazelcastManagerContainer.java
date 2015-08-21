@@ -29,6 +29,7 @@ import com.hazelcast.core.HazelcastInstance;
 public class HazelcastManagerContainer extends AbstractJMSServer {
 
 	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
+	public static final String HAZELCAST_MANAGER_CONFIG_PARAM = "hazelcastManagerConfig";
 
 	public static class HazelcastManagerContainerInstantiator extends AbstractHazelcastContainerInstantiator {
 
@@ -58,6 +59,11 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
 			sc.start();
 			return sc;
+		}
+
+		@Override
+		protected String getHazelcastConfigParam() {
+			return HAZELCAST_MANAGER_CONFIG_PARAM;
 		}
 	}
 
