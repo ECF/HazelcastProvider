@@ -38,8 +38,7 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 			List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 			// For a manager, if a client is exporter then we are an importer
 			if (HAZELCAST_MANAGER_NAME.equals(description.getName())) {
-				if (supportedConfigs.contains(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME)
-						)
+				if (supportedConfigs.contains(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME))
 					results.add(HAZELCAST_MANAGER_NAME);
 			}
 			if (results.size() == 0)

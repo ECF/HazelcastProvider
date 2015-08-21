@@ -31,7 +31,7 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 
 	public static final String HAZELCAST_MEMBER_NAME = "ecf.jms.hazelcast.member";
 	public static final String HAZELCAST_MEMBER_CONFIG_PARAM = "hazelcastMemberConfig";
-	
+
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
@@ -42,8 +42,7 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 				// If it's a normal manager
 				supportedConfigs.contains(HazelcastManagerContainer.HAZELCAST_MANAGER_NAME)
 						// Or the service exporter is a client
-						|| supportedConfigs.contains(HAZELCAST_MEMBER_NAME)
-						) {
+						|| supportedConfigs.contains(HAZELCAST_MEMBER_NAME)) {
 					results.add(HAZELCAST_MEMBER_NAME);
 				}
 			}
