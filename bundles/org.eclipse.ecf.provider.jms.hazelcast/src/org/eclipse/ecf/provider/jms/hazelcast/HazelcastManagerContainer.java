@@ -31,7 +31,7 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
 	public static final String HAZELCAST_MANAGER_CONFIG_PARAM = "hazelcastManagerConfig";
 
-	public static class HazelcastManagerContainerInstantiator extends AbstractHazelcastContainerInstantiator {
+	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
 			List<String> results = new ArrayList<String>();

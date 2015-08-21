@@ -28,7 +28,7 @@ public class Activator implements BundleActivator {
 		// Create and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class, new RemoteServiceDistributionProvider(
 				HazelcastManagerContainer.HAZELCAST_MANAGER_NAME,
-				new HazelcastManagerContainer.HazelcastManagerContainerInstantiator(), "ECF Hazelcast Manager") {
+				new HazelcastManagerContainer.Instantiator(), "ECF Hazelcast Manager", true) {
 			@Override
 			public AdapterConfig createAdapterConfig() {
 				return new AdapterConfig(new RemoteServiceContainerAdapterFactory(), HazelcastManagerContainer.class);
@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
 		// Create and register member distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,  new RemoteServiceDistributionProvider(
 				HazelcastMemberContainer.HAZELCAST_MEMBER_NAME,
-				new HazelcastMemberContainer.HazelcastMemberContainerInstantiator(), "ECF Hazelcast Member") {
+				new HazelcastMemberContainer.Instantiator(), "ECF Hazelcast Member") {
 			@Override
 			public AdapterConfig createAdapterConfig() {
 				return new AdapterConfig(new RemoteServiceContainerAdapterFactory(), HazelcastMemberContainer.class);
