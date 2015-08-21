@@ -22,27 +22,28 @@ import org.osgi.framework.BundleContext;
 public class Activator implements BundleActivator {
 
 	public static final String ID = "org.eclipse.ecf.provider.jms.hazelcast";
-	
+
 	@Override
 	public void start(final BundleContext context1) throws Exception {
-		// Create and register hazelcast manager distribution provider
-		context1.registerService(IRemoteServiceDistributionProvider.class, new RemoteServiceDistributionProvider(
-				HazelcastManagerContainer.HAZELCAST_MANAGER_NAME,
-				new HazelcastManagerContainer.Instantiator(), "ECF Hazelcast Manager", true) {
-			@Override
-			public AdapterConfig createAdapterConfig() {
-				return new AdapterConfig(new RemoteServiceContainerAdapterFactory(), HazelcastManagerContainer.class);
-			}
-		}, null);	
-		// Create and register member distribution provider
-		context1.registerService(IRemoteServiceDistributionProvider.class,  new RemoteServiceDistributionProvider(
-				HazelcastMemberContainer.HAZELCAST_MEMBER_NAME,
-				new HazelcastMemberContainer.Instantiator(), "ECF Hazelcast Member") {
-			@Override
-			public AdapterConfig createAdapterConfig() {
-				return new AdapterConfig(new RemoteServiceContainerAdapterFactory(), HazelcastMemberContainer.class);
-			}
-		}, null);
+		// Build and register hazelcast manager distribution provider
+		context1.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder()
+						.setName(HazelcastManagerContainer.HAZELCAST_MANAGER_NAME)
+						.setInstantiator(new HazelcastManagerContainer.Instantiator())
+						.setDescription("ECF Hazelcast Manager").setServer(true)
+						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+								HazelcastManagerContainer.class))
+						.build(),
+				null);
+		// Build and register hazelcast member distribution provider
+		context1.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder().setName(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME)
+						.setInstantiator(new HazelcastMemberContainer.Instantiator())
+						.setDescription("ECF Hazelcast Member")
+						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+								HazelcastMemberContainer.class))
+						.build(),
+				null);
 	}
 
 	@Override
