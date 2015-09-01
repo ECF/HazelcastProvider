@@ -9,12 +9,8 @@
 ******************************************************************************/
 package org.eclipse.ecf.provider.jms.hazelcast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
-import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
@@ -28,27 +24,7 @@ import com.hazelcast.core.HazelcastInstance;
 
 public class HazelcastManagerContainer extends AbstractJMSServer {
 
-	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
-	public static final String HAZELCAST_MANAGER_CONFIG_PARAM = "hazelcastManagerConfig";
-
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
-
-		public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
-			List<String> results = new ArrayList<String>();
-			List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
-			// For a manager, if a client is exporter then we are an importer
-			if (HAZELCAST_MANAGER_NAME.equals(description.getName())) {
-				if (supportedConfigs.contains(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME))
-					results.add(HAZELCAST_MANAGER_NAME);
-			}
-			if (results.size() == 0)
-				return null;
-			return (String[]) results.toArray(new String[] {});
-		}
-
-		public String[] getSupportedConfigs(ContainerTypeDescription description) {
-			return new String[] { HAZELCAST_MANAGER_NAME };
-		}
 
 		@Override
 		protected IContainer createHazelcastContainer(JMSID serverID, Integer ka,
@@ -59,16 +35,11 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 			sc.start();
 			return sc;
 		}
-
-		@Override
-		protected String getHazelcastConfigParam() {
-			return HAZELCAST_MANAGER_CONFIG_PARAM;
-		}
 	}
 
 	private final HazelcastInstance hazelcast;
 
-	public HazelcastManagerContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
+	protected HazelcastManagerContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
 		super(config);
 		this.hazelcast = hazelcast;
 	}

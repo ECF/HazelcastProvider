@@ -13,6 +13,7 @@ package org.eclipse.ecf.provider.jms.hazelcast;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.provider.generic.GenericContainerInstantiator;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 
@@ -36,7 +38,12 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 	public static final String ID_PARAM = "id";
 	public static final String KEEPALIVE_PARAM = "keepAlive";
 
-	protected static final String[] hazelcastIntents = { "HAZELCAST" };
+	public static final String CONFIG_PARAM = "config";
+
+	protected static final String[] hazelcastIntents = { "hazelcast" };
+
+	protected static final List<String> hazelcastContainerTypeNames = Arrays
+			.asList(new String[] { Activator.HAZELCAST_MANAGER_NAME, Activator.HAZELCAST_MEMBER_NAME });
 
 	protected JMSID getJMSIDFromParameter(Object p) {
 		if (p instanceof String) {
@@ -68,7 +75,27 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 		return null;
 	}
 
-	protected abstract String getHazelcastConfigParam();
+	public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
+		List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
+		String dName = description.getName();
+		List<String> results = new ArrayList<String>();
+		if (hazelcastContainerTypeNames.contains(dName)) {
+			if (supportedConfigs.contains(Activator.HAZELCAST_MEMBER_NAME))
+				results.add(Activator.HAZELCAST_MANAGER_NAME);
+			else if (supportedConfigs.contains(Activator.HAZELCAST_MANAGER_NAME))
+				results.add(Activator.HAZELCAST_MEMBER_NAME);
+		}
+		if (results.size() == 0)
+			return null;
+		return (String[]) results.toArray(new String[] {});
+	}
+
+	public String[] getSupportedConfigs(ContainerTypeDescription description) {
+		String dName = description.getName();
+		if (hazelcastContainerTypeNames.contains(dName))
+			return new String[] { dName };
+		return new String[0];
+	}
 
 	@SuppressWarnings("rawtypes")
 	public IContainer createInstance(ContainerTypeDescription description, Object[] args)
@@ -89,12 +116,9 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 					o = props.get(KEEPALIVE_PARAM);
 					if (o != null)
 						ka = getIntegerFromArg(o);
-					String configParam = getHazelcastConfigParam();
-					if (configParam != null) {
-						o = props.get(configParam);
-						if (o != null)
-							config = getConfigFromArg(o);
-					}
+					o = props.get(CONFIG_PARAM);
+					if (o != null)
+						config = getConfigFromArg(o);
 				} else {
 					id = getJMSIDFromParameter(args[0]);
 					if (args.length > 1)

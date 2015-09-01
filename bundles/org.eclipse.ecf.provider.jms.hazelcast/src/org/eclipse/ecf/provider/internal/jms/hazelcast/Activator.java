@@ -23,12 +23,14 @@ public class Activator implements BundleActivator {
 
 	public static final String ID = "org.eclipse.ecf.provider.jms.hazelcast";
 
+	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
+	public static final String HAZELCAST_MEMBER_NAME = "ecf.jms.hazelcast.member";
+
 	@Override
 	public void start(final BundleContext context1) throws Exception {
 		// Build and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder()
-						.setName(HazelcastManagerContainer.HAZELCAST_MANAGER_NAME)
+				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MANAGER_NAME)
 						.setInstantiator(new HazelcastManagerContainer.Instantiator())
 						.setDescription("ECF Hazelcast Manager").setServer(true)
 						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
@@ -37,7 +39,7 @@ public class Activator implements BundleActivator {
 				null);
 		// Build and register hazelcast member distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder().setName(HazelcastMemberContainer.HAZELCAST_MEMBER_NAME)
+				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MEMBER_NAME)
 						.setInstantiator(new HazelcastMemberContainer.Instantiator())
 						.setDescription("ECF Hazelcast Member")
 						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
