@@ -39,7 +39,8 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 	public static final String KEEPALIVE_PARAM = "keepAlive";
 
 	public static final String CONFIG_PARAM = "config";
-
+	public static final String CONFIGURL_PARAM = "configURL";
+	
 	protected static final String[] hazelcastIntents = { "hazelcast" };
 
 	protected static final List<String> hazelcastContainerTypeNames = Arrays
@@ -75,6 +76,14 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 		return null;
 	}
 
+	protected Config getURLConfigFromArg(Object o) throws Exception {
+		if (o instanceof URL) 
+			return new UrlXmlConfig((URL) o);
+		else if (o instanceof String) 
+			return new UrlXmlConfig(new URL((String) o));
+		return null;
+	}
+	
 	public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
 		List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 		String dName = description.getName();
@@ -116,6 +125,9 @@ public abstract class AbstractHazelcastContainerInstantiator extends GenericCont
 					o = props.get(KEEPALIVE_PARAM);
 					if (o != null)
 						ka = getIntegerFromArg(o);
+					o = props.get(CONFIGURL_PARAM);
+					if (o != null)
+						config = getURLConfigFromArg(o);
 					o = props.get(CONFIG_PARAM);
 					if (o != null)
 						config = getConfigFromArg(o);
