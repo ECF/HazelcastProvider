@@ -9,6 +9,11 @@
 ******************************************************************************/
 package org.eclipse.ecf.tests.provider.hazelcast.remoteservice;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.ecf.core.ContainerFactory;
+import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.tests.osgi.services.distribution.AbstractRemoteServiceAccessTest;
@@ -45,6 +50,13 @@ public class HazelcastRemoteServiceAccessTest extends AbstractRemoteServiceAcces
 	protected ID createServerID() throws Exception {
 		return IDFactory.getDefault().createID(Hazelcast.NAMESPACE_NAME, Hazelcast.TARGET_NAME);
 	}
+
+	protected IContainer createServer() throws Exception {
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("id", Hazelcast.TARGET_NAME);
+		return ContainerFactory.getDefault().createContainer(getServerContainerName(), parameters);
+	}
+
 
 	protected String getServerIdentity() {
 		return Hazelcast.TARGET_NAME;

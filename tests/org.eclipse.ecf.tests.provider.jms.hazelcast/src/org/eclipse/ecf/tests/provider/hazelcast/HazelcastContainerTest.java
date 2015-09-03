@@ -1,5 +1,8 @@
 package org.eclipse.ecf.tests.provider.hazelcast;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.ecf.core.ContainerFactory;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
@@ -38,14 +41,16 @@ public class HazelcastContainerTest extends JMSContainerAbstractTestCase {
 	}
 
 	protected IContainer createServer() throws Exception {
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("id", getServerIdentity());
 		return ContainerFactory.getDefault().createContainer(getServerContainerName(),
-				new Object[] { getServerIdentity() });
+				map);
 	}
 
 	public void testConnectClient() throws Exception {
 		IContainer client = getClients()[0];
 		ID targetID = IDFactory.getDefault().createID(client.getConnectNamespace(),
-				new Object[] { getServerIdentity() });
+				getServerIdentity());
 		Thread.sleep(3000);
 		client.connect(targetID, null);
 		Thread.sleep(3000);
