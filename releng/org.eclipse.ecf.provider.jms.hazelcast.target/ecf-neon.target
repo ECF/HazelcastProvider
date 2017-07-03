@@ -30,7 +30,7 @@
 <repository location="http://download.eclipse.org/paho/releases/1.1.1/Java"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.ecf.provider.jms.feature.feature.group" version="2.4.0.201706162014"/>
+<unit id="org.eclipse.ecf.provider.jms.feature.feature.group" version="2.4.0.201707031257"/>
 <repository location="https://raw.githubusercontent.com/ECF/JMS/master/features/org.eclipse.ecf.provider.jms.feature/build"/>
 </location>
 <location path="${project_loc:org.eclipse.ecf.provider.jms.hazelcast.target}/bundles" type="Directory"/>
