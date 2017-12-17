@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Hazelcast Provider Neon Target" sequenceNumber="33">
+<?pde version="3.8"?><target name="Hazelcast Provider Neon Target" sequenceNumber="35">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -15,11 +15,6 @@
 <repository location="http://download.eclipse.org/releases/neon"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.13.7.v20170517-0201"/>
-<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="3.13.7.v20170517-0201"/>
-<repository location="http://download.eclipse.org/rt/ecf/3.13.7/site.p2"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="javax.jms" version="1.1.0.v201205091237"/>
 <unit id="javax.jms.source" version="1.1.0.v201205091237"/>
 <repository location="http://download.eclipse.org/tools/orbit/R-builds/R20170516192513/repository"/>
@@ -30,8 +25,15 @@
 <repository location="http://download.eclipse.org/paho/releases/1.1.1/Java"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.ecf.provider.jms.feature.feature.group" version="2.4.0.201707031257"/>
-<repository location="https://raw.githubusercontent.com/ECF/JMS/master/features/org.eclipse.ecf.provider.jms.feature/build"/>
+<unit id="org.eclipse.ecf.provider.jms.feature.feature.group" version="2.6.0.201712171126"/>
+<repository location="https://raw.githubusercontent.com/ECF/JMS/master/build"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.feature.group" version="1.0.0.v20170816-0237"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.source.feature.group" version="1.0.0.v20170816-0237"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.13.8.v20170816-0246"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="3.13.8.v20170816-0246"/>
+<repository location="http://download.eclipse.org/rt/ecf/3.13.8/site.p2"/>
 </location>
 <location path="${project_loc:org.eclipse.ecf.provider.jms.hazelcast.target}/bundles" type="Directory"/>
 </locations>
