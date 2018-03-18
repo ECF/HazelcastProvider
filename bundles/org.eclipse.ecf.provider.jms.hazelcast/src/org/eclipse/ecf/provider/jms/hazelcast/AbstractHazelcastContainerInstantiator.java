@@ -22,6 +22,7 @@ import org.eclipse.ecf.core.ContainerCreateException;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.IDFactory;
+import org.eclipse.ecf.core.provider.ContainerIntentException;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
@@ -59,6 +60,11 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 			return null;
 	}
 
+	@Override
+	protected boolean supportsOSGIAsyncIntent(ContainerTypeDescription description) {
+		return true;
+	}
+	
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
 		List<String> results = new ArrayList<String>(Arrays.asList(super.getSupportedIntents(description)));
 		results.addAll(Arrays.asList(hazelcastIntents));
@@ -75,29 +81,34 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 			return new UrlXmlConfig((URL) o);
 		else if (o instanceof String)
 			return new InMemoryXmlConfig((String) o);
-		return null;
+		return new XmlConfigBuilder().build();
 	}
 
 	protected Config getURLConfigFromArg(Map<String, ?> parameters) throws Exception {
 		Object o = getParameterValue(parameters, CONFIGURL_PARAM, Object.class, null);
-		if (o instanceof URL)
-			return new UrlXmlConfig((URL) o);
-		else if (o instanceof String)
+		if (o instanceof String)
 			return new UrlXmlConfig(new URL((String) o));
 		return null;
 	}
 
+	protected void checkOSGIIntents(ContainerTypeDescription description, Config config, Map<String, ?> properties)
+			throws ContainerIntentException {
+		checkAsyncIntent(description, properties);
+	}
+	
 	public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)
 			throws ContainerCreateException {
 		try {
-			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,
-					(description.getName().equals(Activator.HAZELCAST_MANAGER_NAME)) ? DEFAULT_SERVER_ID
+			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
+			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,isServer? DEFAULT_SERVER_ID
 							: UUID.randomUUID().toString());
 			Integer keepAlive = getParameterValue(parameters, KEEPALIVE_PARAM, Integer.class,
 					new Integer(HazelcastManagerContainer.DEFAULT_KEEPALIVE));
-			Config config = getConfigFromArg(parameters);
+			Config config = getURLConfigFromArg(parameters);
+			getConfigFromArg(parameters);
 			if (config == null)
-				config = getURLConfigFromArg(parameters);
+				config = getConfigFromArg(parameters);
+			checkOSGIIntents(description, config, parameters);
 			return createHazelcastContainer(id, keepAlive, parameters, config);
 		} catch (Exception e) {
 			return throwCreateException("Could not create hazelcast container with name " + description.getName(), e);
