@@ -111,6 +111,8 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 			checkOSGIIntents(description, config, parameters);
 			return createHazelcastContainer(id, keepAlive, parameters, config);
 		} catch (Exception e) {
+			if (e instanceof ContainerIntentException) 
+				throw (ContainerIntentException) e;
 			return throwCreateException("Could not create hazelcast container with name " + description.getName(), e);
 		}
 	}
