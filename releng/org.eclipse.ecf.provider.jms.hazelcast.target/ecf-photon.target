@@ -5,12 +5,8 @@
 <repository location="http://download.eclipse.org/cbi/updates/license/1.0.1.v20140414-1359"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.emf.edit.ui.feature.group" version="2.14.0.v20180213-0527"/>
-<unit id="org.eclipse.emf.edit.ui.source.feature.group" version="2.14.0.v20180213-0527"/>
-<unit id="org.eclipse.pde.feature.group" version="3.13.100.v20180308-0630"/>
-<unit id="org.eclipse.pde.source.feature.group" version="3.13.100.v20180308-0630"/>
-<unit id="org.eclipse.platform.feature.group" version="4.8.0.v20180308-0630"/>
-<unit id="org.eclipse.platform.source.feature.group" version="4.8.0.v20180308-0630"/>
+<unit id="org.eclipse.platform.feature.group"/>
+<unit id="org.eclipse.platform.source.feature.group"/>
 <repository location="http://download.eclipse.org/releases/oxygen"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
