@@ -11,7 +11,7 @@
 <unit id="org.eclipse.pde.source.feature.group" version="3.13.100.v20180308-0630"/>
 <unit id="org.eclipse.platform.feature.group" version="4.8.0.v20180308-0630"/>
 <unit id="org.eclipse.platform.source.feature.group" version="4.8.0.v20180308-0630"/>
-<repository location="http://download.eclipse.org/releases/photon"/>
+<repository location="http://download.eclipse.org/releases/oxygen"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="javax.jms" version="1.1.0.v201205091237"/>
