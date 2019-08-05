@@ -41,6 +41,11 @@
                   <type>target</type>
                   <classifier>ecf-photon</classifier>
                 </artifact>
+                <artifact>
+                  <file>ecf-2019-03.target</file>
+                  <type>target</type>
+                  <classifier>ecf-2013-03</classifier>
+                </artifact>
               </artifacts>
             </configuration>
           </execution>
