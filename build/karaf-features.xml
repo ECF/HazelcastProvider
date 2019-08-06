@@ -1,5 +1,5 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
-	name="ecf-remoteservices-jaxrs-1.10.0">
+	name="ecf-remoteservices-hazelcast-1.4.0">
 
 	<feature name="ecf-rs-distribution-hazelcast" version="1.4.0"
 		description="ECF Hazelcast Distribution Provider Support. See https://github.com/ECF/HazelcastProvider">
