@@ -64,7 +64,7 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 	protected boolean supportsOSGIAsyncIntent(ContainerTypeDescription description) {
 		return true;
 	}
-	
+
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
 		List<String> results = new ArrayList<String>(Arrays.asList(super.getSupportedIntents(description)));
 		results.addAll(Arrays.asList(hazelcastIntents));
@@ -95,23 +95,24 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 			throws ContainerIntentException {
 		checkAsyncIntent(description, properties);
 	}
-	
+
 	public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)
 			throws ContainerCreateException {
 		try {
-			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
-			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,isServer? DEFAULT_SERVER_ID
-							: UUID.randomUUID().toString());
-			Integer keepAlive = getParameterValue(parameters, KEEPALIVE_PARAM, Integer.class,
-					new Integer(HazelcastManagerContainer.DEFAULT_KEEPALIVE));
 			Config config = getURLConfigFromArg(parameters);
-			getConfigFromArg(parameters);
 			if (config == null)
 				config = getConfigFromArg(parameters);
+
+			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
+			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,
+					isServer ? DEFAULT_SERVER_ID : UUID.randomUUID().toString());
+			Integer keepAlive = getParameterValue(parameters, KEEPALIVE_PARAM, Integer.class,
+					new Integer(HazelcastManagerContainer.DEFAULT_KEEPALIVE));
+
 			checkOSGIIntents(description, config, parameters);
 			return createHazelcastContainer(id, keepAlive, parameters, config);
 		} catch (Exception e) {
-			if (e instanceof ContainerIntentException) 
+			if (e instanceof ContainerIntentException)
 				throw (ContainerIntentException) e;
 			return throwCreateException("Could not create hazelcast container with name " + description.getName(), e);
 		}

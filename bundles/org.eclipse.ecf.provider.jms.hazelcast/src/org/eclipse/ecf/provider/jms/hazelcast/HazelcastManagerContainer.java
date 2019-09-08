@@ -9,6 +9,7 @@
 ******************************************************************************/
 package org.eclipse.ecf.provider.jms.hazelcast;
 
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.eclipse.ecf.core.IContainer;
@@ -30,25 +31,44 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 		protected IContainer createHazelcastContainer(JMSID serverID, Integer ka,
 				@SuppressWarnings("rawtypes") Map props, Config config) throws Exception {
 			HazelcastManagerContainer sc = new HazelcastManagerContainer(
-					new JMSContainerConfig(serverID, ka.intValue(), props),
-					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
+					new JMSContainerConfig(serverID, ka.intValue(), props), config);
 			sc.start();
 			return sc;
 		}
 	}
 
-	private final HazelcastInstance hazelcast;
+	private final Config hazelcastConfig;
+	private HazelcastInstance hazelcastInstance;
 
-	protected HazelcastManagerContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
+	protected HazelcastManagerContainer(JMSContainerConfig config, Config hazelcastConfig) {
 		super(config);
-		this.hazelcast = hazelcast;
+		this.hazelcastConfig = hazelcastConfig;
 	}
 
 	@Override
 	public void start() throws ECFException {
-		final ISynchAsynchConnection connection = new HazelcastManagerChannel(this.getReceiver(), this.hazelcast);
+		if (this.hazelcastInstance == null) {
+			if (this.hazelcastConfig != null) {
+				try {
+					HazelcastConfigUtil.ajustConfig(this.hazelcastConfig, getID());
+				} catch (URISyntaxException e) {
+					throw new ECFException("Cannot start HazelcastManagerContainer", e);
+				}
+				this.hazelcastInstance = Hazelcast.newHazelcastInstance(this.hazelcastConfig);
+			} else {
+				this.hazelcastInstance = Hazelcast.newHazelcastInstance();
+			}
+		}
+		final ISynchAsynchConnection connection = new HazelcastManagerChannel(this.getReceiver(),
+				this.hazelcastInstance);
 		setConnection(connection);
 		connection.start();
+	}
+
+	@Override
+	public void dispose() {
+		disconnect();
+		super.dispose();
 	}
 
 	@Override
@@ -58,6 +78,10 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 		if (conn != null)
 			conn.disconnect();
 		setConnection(null);
+		if (hazelcastInstance != null) {
+			this.hazelcastInstance.shutdown();
+			this.hazelcastInstance = null;
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2015 Composent, Inc. and others. All rights reserved. This
+* Copyright (c) 2019 Composent, Inc. and others. All rights reserved. This
 * program and the accompanying materials are made available under the terms of
 * the Eclipse Public License v1.0 which accompanies this distribution, and is
 * available at http://www.eclipse.org/legal/epl-v10.html
@@ -9,6 +9,7 @@
 ******************************************************************************/
 package org.eclipse.ecf.provider.jms.hazelcast;
 
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.eclipse.ecf.core.IContainer;
@@ -30,21 +31,43 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 		@Override
 		protected IContainer createHazelcastContainer(JMSID id, Integer ka, @SuppressWarnings("rawtypes") Map props,
 				Config config) throws Exception {
-			return new HazelcastMemberContainer(new JMSContainerConfig(id, ka, props),
-					(config == null) ? Hazelcast.newHazelcastInstance() : Hazelcast.newHazelcastInstance(config));
+			return new HazelcastMemberContainer(new JMSContainerConfig(id, ka, props), config);
 		}
 	}
 
-	private final HazelcastInstance hazelcast;
+	private final Config hazelcastConfig;
+	private HazelcastInstance hazelcastInstance;
 
-	protected HazelcastMemberContainer(JMSContainerConfig config, HazelcastInstance hazelcast) {
+	protected HazelcastMemberContainer(JMSContainerConfig config, Config hazelcastConfig) {
 		super(config);
-		this.hazelcast = hazelcast;
+		this.hazelcastConfig = hazelcastConfig;
 	}
 
 	@Override
 	protected ISynchAsynchConnection createConnection(ID targetID, Object data) throws ConnectionCreateException {
-		return new HazelcastMemberChannel(getReceiver(), hazelcast);
+		if (this.hazelcastInstance == null) {
+			if (this.hazelcastConfig != null) {
+				try {
+					HazelcastConfigUtil.ajustConfig(this.hazelcastConfig, targetID);
+				} catch (URISyntaxException e) {
+					throw new ConnectionCreateException("Could not adjust hazelcastConfig with targetID=" + targetID,
+							e);
+				}
+				hazelcastInstance = Hazelcast.newHazelcastInstance(this.hazelcastConfig);
+			} else {
+				hazelcastInstance = Hazelcast.newHazelcastInstance();
+			}
+			return new HazelcastMemberChannel(getReceiver(), hazelcastInstance);
+		} else
+			throw new ConnectionCreateException("Cannot connect because already have hazelcast instance");
 	}
 
+	@Override
+	public void disconnect() {
+		super.disconnect();
+		if (this.hazelcastInstance != null) {
+			this.hazelcastInstance.shutdown();
+			this.hazelcastInstance = null;
+		}
+	}
 }
