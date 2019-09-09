@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -94,6 +96,34 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 	protected void checkOSGIIntents(ContainerTypeDescription description, Config config, Map<String, ?> properties)
 			throws ContainerIntentException {
 		checkAsyncIntent(description, properties);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public Dictionary getPropertiesForImportedConfigs(ContainerTypeDescription description, String[] importedConfigs,
+			Dictionary exportedProperties) {
+		Object o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + CONFIGURL_PARAM);
+		Hashtable h = new Hashtable();
+		if (o != null) {
+			h.put(CONFIGURL_PARAM, o);
+		} else {
+			o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + CONFIG_PARAM);
+			if (o != null) {
+				h.put(CONFIG_PARAM, o);
+			}
+		}
+		if (h.isEmpty()) {
+			o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIGURL_PARAM);
+			if (o != null) {
+				h.put(CONFIGURL_PARAM, o);
+			} else {
+				o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIG_PARAM);
+				if (o != null) {
+					h.put(CONFIG_PARAM, o);
+				}
+			}
+		}
+		return h;
 	}
 
 	public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)

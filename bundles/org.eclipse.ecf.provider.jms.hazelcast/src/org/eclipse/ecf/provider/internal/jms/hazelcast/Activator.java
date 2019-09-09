@@ -23,8 +23,9 @@ public class Activator implements BundleActivator {
 
 	public static final String ID = "org.eclipse.ecf.provider.jms.hazelcast";
 
-	public static final String HAZELCAST_MANAGER_NAME = "ecf.jms.hazelcast.manager";
-	public static final String HAZELCAST_MEMBER_NAME = "ecf.jms.hazelcast.member";
+	public static final String HAZELCAST_PREFIX = "ecf.jms.hazelcast";
+	public static final String HAZELCAST_MANAGER_NAME = HAZELCAST_PREFIX + ".manager";
+	public static final String HAZELCAST_MEMBER_NAME = HAZELCAST_PREFIX + ".member";
 
 	@Override
 	public void start(final BundleContext context1) throws Exception {
