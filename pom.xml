@@ -90,6 +90,7 @@
     <module>releng/org.eclipse.ecf.provider.jms.hazelcast.target</module>
     <module>features/org.eclipse.ecf.provider.jms.hazelcast.feature</module>
     <module>bundles/org.eclipse.ecf.provider.jms.hazelcast</module>
+    <module>bundles/org.eclipse.ecf.discovery.provider.hazelcast</module>
   </modules>
 
   <build>

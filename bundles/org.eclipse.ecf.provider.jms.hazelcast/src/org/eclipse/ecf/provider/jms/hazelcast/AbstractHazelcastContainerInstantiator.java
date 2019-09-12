@@ -37,7 +37,7 @@ import com.hazelcast.config.XmlConfigBuilder;
 
 public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteServiceContainerInstantiator {
 
-	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/exampleTopic";
+	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/defaultRemoteServicesTopic";
 
 	public static final String ID_PARAM = "id";
 	public static final String KEEPALIVE_PARAM = "keepAlive";
