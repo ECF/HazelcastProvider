@@ -252,7 +252,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	}
 
 	private boolean initialized = false;
-	
+
 	private void initializeCache() {
 		List<HazelcastServiceInfo> notify = null;
 		synchronized (services) {
@@ -266,7 +266,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 			notify.forEach(s -> fireServiceInfoDiscovered(s));
 		}
 	}
-	
+
 	@Override
 	public void addServiceListener(IServiceListener aListener) {
 		super.addServiceListener(aListener);
@@ -278,22 +278,29 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		super.addServiceListener(aType, aListener);
 		initializeCache();
 	}
-	
+
 	@Override
 	public void addServiceTypeListener(IServiceTypeListener aListener) {
 		super.addServiceTypeListener(aListener);
 		initializeCache();
 	}
-	
+
 	private void removeAllServiceInfos() {
 		removeServicesForMember(null);
 	}
 
 	private void removeServicesForMember(String member) {
 		trace("removeServiceInfosForMember", "member=" + member);
-		List<HazelcastServiceInfo> removedServices = services.values().stream().filter(si -> {
-			return (member == null) ? true : member.equals(si.getHazelcastId());
-		}).collect(Collectors.toList());
+		List<HazelcastServiceInfo> removedServices = null;
+		synchronized (services) {
+			removedServices = services.values().stream().filter(si -> {
+				return (member == null) ? true : member.equals(si.getHazelcastId());
+			}).collect(Collectors.toList());
+			// Remove from cache
+			for (HazelcastServiceInfo si : removedServices) {
+				services.remove(si.getKey());
+			}
+		}
 		// Now notify
 		removedServices.forEach(si -> fireServiceUndiscovered(new ServiceContainerEvent(si, getID())));
 	}
