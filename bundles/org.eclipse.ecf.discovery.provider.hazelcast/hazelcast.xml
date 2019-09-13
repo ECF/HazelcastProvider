@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  The default ECF discovery hazelcast configuration.
+  The default ECF Hazelcast Discovery configuration.
+  
+  This configuration is used to setup the ECF Discovery provider by default.
+  This configuration may be overridden by providing a fully qualified URL
+  via system property:
+  
+  -Decf.discovery.hazelcast.configURL=<url to discovery hazelcast config xml file>
 
+  To learn how to configure Hazelcast, please see the schema at
+  https://hazelcast.com/schema/config/hazelcast-config-3.12.xsd
+  or the Reference Manual at https://hazelcast.org/documentation/
 -->
 
 <!--suppress XmlDefaultAttributeValue -->
@@ -15,7 +24,7 @@
     </group>
     <management-center enabled="false">http://localhost:8080/hazelcast-mancenter</management-center>
     <network>
-        <port auto-increment="true" port-count="100">5360</port>
+        <port auto-increment="true" port-count="100">6701</port>
         <outbound-ports>
             <!--
             Allowed port range when connecting to other nodes.
@@ -26,7 +35,7 @@
         <join>
             <multicast enabled="true">
                 <multicast-group>224.2.2.5</multicast-group>
-                <multicast-port>54357</multicast-port>
+                <multicast-port>54327</multicast-port>
             </multicast>
             <tcp-ip enabled="false">
                 <interface>127.0.0.1</interface>
@@ -34,6 +43,41 @@
                     <member>127.0.0.1</member>
                 </member-list>
             </tcp-ip>
+            <aws enabled="false">
+                <access-key>my-access-key</access-key>
+                <secret-key>my-secret-key</secret-key>
+                <!--optional, default is us-east-1 -->
+                <region>us-west-1</region>
+                <!--optional, default is ec2.amazonaws.com. If set, region shouldn't be set as it will override this property -->
+                <host-header>ec2.amazonaws.com</host-header>
+                <!-- optional, only instances belonging to this group will be discovered, default will try all running instances -->
+                <security-group-name>hazelcast-sg</security-group-name>
+                <tag-key>type</tag-key>
+                <tag-value>hz-nodes</tag-value>
+            </aws>
+            <gcp enabled="false">
+                <zones>us-east1-b,us-east1-c</zones>
+            </gcp>
+            <azure enabled="false">
+                <client-id>CLIENT_ID</client-id>
+                <client-secret>CLIENT_SECRET</client-secret>
+                <tenant-id>TENANT_ID</tenant-id>
+                <subscription-id>SUB_ID</subscription-id>
+                <cluster-id>HZLCAST001</cluster-id>
+                <group-name>GROUP-NAME</group-name>
+            </azure>
+            <kubernetes enabled="false">
+                <namespace>MY-KUBERNETES-NAMESPACE</namespace>
+                <service-name>MY-SERVICE-NAME</service-name>
+                <service-label-name>MY-SERVICE-LABEL-NAME</service-label-name>
+                <service-label-value>MY-SERVICE-LABEL-VALUE</service-label-value>
+            </kubernetes>
+            <eureka enabled="false">
+                <self-registration>true</self-registration>
+                <namespace>hazelcast</namespace>
+            </eureka>
+            <discovery-strategies>
+            </discovery-strategies>
         </join>
         <interfaces enabled="false">
             <interface>10.10.1.*</interface>
@@ -61,7 +105,7 @@
             <icmp enabled="false"/>
         </failure-detector>
     </network>
-    <partition-group enabled="true"/>
+    <partition-group enabled="false"/>
     <executor-service name="default">
         <pool-size>16</pool-size>
         <!--Queue capacity. 0 means Integer.MAX_VALUE.-->
@@ -138,7 +182,7 @@
             automatically evicted from the map. Entry is touched if get, put or containsKey is called.
             Any integer between 0 and Integer.MAX_VALUE. 0 means infinite. Default is 0.
         -->
-        <max-idle-seconds>30</max-idle-seconds>
+        <max-idle-seconds>0</max-idle-seconds>
         <!--
             Valid values are:
             NONE (no eviction),

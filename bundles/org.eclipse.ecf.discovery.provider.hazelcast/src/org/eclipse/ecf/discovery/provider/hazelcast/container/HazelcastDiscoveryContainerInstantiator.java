@@ -19,49 +19,45 @@ public class HazelcastDiscoveryContainerInstantiator implements IContainerInstan
 
 	public static final String NAME = "ecf.discovery.hazelcast"; //$NON-NLS-1$
 
-	private HazelcastDiscoveryContainer createContainer(HazelcastDiscoveryContainerConfig config) throws ContainerCreateException {
+	private HazelcastDiscoveryContainer createContainer(HazelcastDiscoveryContainerConfig config)
+			throws ContainerCreateException {
 		try {
-			return new HazelcastDiscoveryContainer(config);
+			return new HazelcastDiscoveryContainer((config == null) ? new HazelcastDiscoveryContainerConfig() : config);
 		} catch (Exception e) {
-			ContainerCreateException cce = new ContainerCreateException(
-					"Could not create etcd discovery container", e); //$NON-NLS-1$
+			ContainerCreateException cce = new ContainerCreateException("Could not create etcd discovery container", e); //$NON-NLS-1$
 			cce.setStackTrace(e.getStackTrace());
 			throw cce;
 		}
 	}
-	
-	public IContainer createInstance(ContainerTypeDescription description,
-			Object[] parameters) throws ContainerCreateException {
+
+	public IContainer createInstance(ContainerTypeDescription description, Object[] parameters)
+			throws ContainerCreateException {
 
 		HazelcastDiscoveryContainer result = null;
-		if (parameters == null || parameters.length == 0) {
+		if (parameters == null || parameters.length == 0 || parameters[0] == null) {
 			result = createContainer(null);
 		} else if (parameters[0] instanceof HazelcastDiscoveryContainerConfig) {
 			HazelcastDiscoveryContainerConfig edcc = (HazelcastDiscoveryContainerConfig) parameters[0];
-			if (edcc != null) 
+			if (edcc != null)
 				result = createContainer(edcc);
 		}
 		return result;
 	}
 
-	public String[] getSupportedAdapterTypes(
-			ContainerTypeDescription description) {
+	public String[] getSupportedAdapterTypes(ContainerTypeDescription description) {
 		if (description.getName().equals(NAME))
-			return new String[] { IContainer.class.getName(),
-					IDiscoveryAdvertiser.class.getName(),
+			return new String[] { IContainer.class.getName(), IDiscoveryAdvertiser.class.getName(),
 					IDiscoveryLocator.class.getName() };
 		return new String[0];
 	}
 
 	@SuppressWarnings("rawtypes")
-	public Class[][] getSupportedParameterTypes(
-			ContainerTypeDescription description) {
+	public Class[][] getSupportedParameterTypes(ContainerTypeDescription description) {
 		return new Class[][] { { String.class, Void.class } };
 	}
 
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
 		return null;
 	}
-
 
 }
