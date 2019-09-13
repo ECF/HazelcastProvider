@@ -91,6 +91,7 @@
     <module>features/org.eclipse.ecf.provider.jms.hazelcast.feature</module>
     <module>bundles/org.eclipse.ecf.provider.jms.hazelcast</module>
     <module>bundles/org.eclipse.ecf.discovery.provider.hazelcast</module>
+    <module>features/org.eclipse.ecf.discovery.provider.hazelcast.feature</module>
   </modules>
 
   <build>

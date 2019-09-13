@@ -24,6 +24,7 @@ import org.eclipse.ecf.core.security.IConnectContext;
 import org.eclipse.ecf.discovery.AbstractDiscoveryContainerAdapter;
 import org.eclipse.ecf.discovery.IServiceInfo;
 import org.eclipse.ecf.discovery.IServiceListener;
+import org.eclipse.ecf.discovery.IServiceTypeListener;
 import org.eclipse.ecf.discovery.ServiceContainerEvent;
 import org.eclipse.ecf.discovery.identity.IServiceID;
 import org.eclipse.ecf.discovery.identity.IServiceTypeID;
@@ -47,9 +48,14 @@ import com.hazelcast.core.MembershipListener;
 
 public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapter {
 
+	// Hazelcast targetID (from HazelcastDiscoveryContainerConfig
 	private HazelcastServiceID targetID;
+	// Hazelcast instance
 	private HazelcastInstance hazelcastInstance;
+	// Hazelcast map used to do service info distribution
 	private IMap<String, HazelcastServiceInfo> hazelcastMap;
+	// Map of serviceLocation (id) -> HazelcastServiceInfo...local cache
+	// of hazelcastMap contents
 	private Map<String, HazelcastServiceInfo> services;
 
 	public HazelcastDiscoveryContainer(HazelcastDiscoveryContainerConfig config) {
@@ -59,13 +65,13 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 
 	@Override
 	public IServiceInfo getServiceInfo(IServiceID aServiceID) {
-		return flattenServices().filter(s -> {
+		return servicesStream().filter(s -> {
 			return s.getServiceID().equals(aServiceID);
 		}).findFirst().get();
 	}
 
 	private List<IServiceInfo> getServices0() {
-		return flattenServices().collect(Collectors.toList());
+		return servicesStream().collect(Collectors.toList());
 	}
 
 	@Override
@@ -74,12 +80,12 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		return results.toArray(new IServiceInfo[results.size()]);
 	}
 
-	private Stream<HazelcastServiceInfo> flattenServices() {
+	private Stream<HazelcastServiceInfo> servicesStream() {
 		return services.values().stream();
 	}
 
 	private IServiceInfo[] filterServicesByTypeID(IServiceTypeID aServiceTypeID) {
-		List<IServiceInfo> results = flattenServices().filter(s -> {
+		List<IServiceInfo> results = servicesStream().filter(s -> {
 			return (aServiceTypeID != null) ? s.getServiceID().getServiceTypeID().equals(aServiceTypeID) : true;
 		}).collect(Collectors.toList());
 		return results.toArray(new IServiceInfo[results.size()]);
@@ -92,7 +98,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 
 	@Override
 	public IServiceTypeID[] getServiceTypes() {
-		List<IServiceTypeID> typeIDs = flattenServices().map(s -> s.getServiceID().getServiceTypeID())
+		List<IServiceTypeID> typeIDs = servicesStream().map(s -> s.getServiceID().getServiceTypeID())
 				.collect(Collectors.toList());
 		return typeIDs.toArray(new IServiceTypeID[typeIDs.size()]);
 	}
@@ -245,17 +251,40 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		return targetID;
 	}
 
+	private boolean initialized = false;
+	
+	private void initializeCache() {
+		List<HazelcastServiceInfo> notify = null;
+		synchronized (services) {
+			if (!initialized) {
+				services.putAll(this.hazelcastMap);
+				initialized = true;
+				notify = new ArrayList<HazelcastServiceInfo>(this.services.values());
+			}
+		}
+		if (notify != null) {
+			notify.forEach(s -> fireServiceInfoDiscovered(s));
+		}
+	}
+	
 	@Override
 	public void addServiceListener(IServiceListener aListener) {
 		super.addServiceListener(aListener);
-		List<HazelcastServiceInfo> notify = null;
-		synchronized (services) {
-			services.putAll(this.hazelcastMap);
-			notify = new ArrayList<HazelcastServiceInfo>(this.services.values());
-		}
-		notify.forEach(s -> fireServiceInfoDiscovered(s));
+		initializeCache();
 	}
 
+	@Override
+	public void addServiceListener(IServiceTypeID aType, IServiceListener aListener) {
+		super.addServiceListener(aType, aListener);
+		initializeCache();
+	}
+	
+	@Override
+	public void addServiceTypeListener(IServiceTypeListener aListener) {
+		super.addServiceTypeListener(aListener);
+		initializeCache();
+	}
+	
 	private void removeAllServiceInfos() {
 		removeServicesForMember(null);
 	}
@@ -278,6 +307,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				this.hazelcastInstance = null;
 				this.hazelcastMap = null;
 				this.targetID = null;
+				this.initialized = false;
 			}
 			services.clear();
 		}
