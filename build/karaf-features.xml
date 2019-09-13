@@ -18,14 +18,14 @@
 		</bundle>
 		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201806152009.jar
 		</bundle>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.0.201909131146.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.0.201909131257.jar
 		</bundle>
 	</feature>
 
 	<feature name="ecf-rs-discovery-hazelcast" version="1.5.0"
 		description="ECF Hazelcast Discovery Provider Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-hazelcast-deps</feature>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.0.201909131146.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.0.201909131257.jar
 		</bundle>
 	</feature>
 
