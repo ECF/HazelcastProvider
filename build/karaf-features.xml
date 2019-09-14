@@ -7,7 +7,7 @@
 		<feature>ecf-rs-console</feature>
 		<feature>transaction-api</feature>
 		<bundle>mvn:javax.transaction/javax.transaction-api/1.2</bundle>
-		<bundle>mvn:com.hazelcast/com.hazelcast/3.12.2</bundle>
+		<bundle>mvn:com.hazelcast/hazelcast/3.12.2</bundle>
 		</bundle>
 	</feature>
 	
