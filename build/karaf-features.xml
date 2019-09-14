@@ -5,7 +5,7 @@
 		description="ECF Hazelcast Dependencies Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-rsa</feature>
 		<feature>ecf-rs-console</feature>
-		<feature>transaction-api</bundle>
+		<feature>transaction-api</feature>
 		<bundle>mvn:com.hazelcast/hazelcast/3.12.2</bundle>
 	</feature>
 	
