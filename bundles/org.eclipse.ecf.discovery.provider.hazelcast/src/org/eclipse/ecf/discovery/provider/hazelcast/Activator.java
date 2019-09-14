@@ -112,11 +112,9 @@ public class Activator implements BundleActivator {
 			IDFactory.getDefault().addNamespace(new HazelcastNamespace());
 			context.registerService(ContainerTypeDescription.class, ctd, null);
 
-			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 			Config hazelcastConfig = null;
 			InputStream hazelcastInputStream = null;
 			try {
-				Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 				hazelcastInputStream = hazelcastConfigFile.openStream();
 				hazelcastConfig = new XmlConfigBuilder(hazelcastInputStream).build();
 			} finally {
@@ -126,7 +124,6 @@ public class Activator implements BundleActivator {
 					} catch (Exception e) {
 					}
 				}
-				Thread.currentThread().setContextClassLoader(ccl);
 			}
 
 			hazelcastConfig.setClassLoader(this.getClass().getClassLoader());
@@ -161,9 +158,7 @@ public class Activator implements BundleActivator {
 
 	synchronized HazelcastDiscoveryContainer getHazelcastContainer(HazelcastDiscoveryContainerConfig config) {
 		if (container == null) {
-			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 			try {
-				Thread.currentThread().setContextClassLoader(ccl);
 				container = (HazelcastDiscoveryContainer) getContainerFactory().createContainer(ctd,
 						(Object[]) new Object[] { config });
 				container.connect(null, null);
@@ -174,8 +169,6 @@ public class Activator implements BundleActivator {
 				LogUtility.logError("getHazelcastContainer", DebugOptions.DEBUG, this.getClass(), //$NON-NLS-1$
 						"Hazelcast discovery setup failed", e); //$NON-NLS-1$
 				container = null;
-			} finally {
-				Thread.currentThread().setContextClassLoader(ccl);
 			}
 		}
 		return container;

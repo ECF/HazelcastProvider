@@ -136,11 +136,10 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
 			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,
 					isServer ? DEFAULT_SERVER_ID : UUID.randomUUID().toString());
-			Integer keepAlive = getParameterValue(parameters, KEEPALIVE_PARAM, Integer.class,
-					new Integer(HazelcastManagerContainer.DEFAULT_KEEPALIVE));
-
 			checkOSGIIntents(description, config, parameters);
-			return createHazelcastContainer(id, keepAlive, parameters, config);
+			// set config classloader
+			config.setClassLoader(this.getClass().getClassLoader());
+			return createHazelcastContainer(id, parameters, config);
 		} catch (Exception e) {
 			if (e instanceof ContainerIntentException)
 				throw (ContainerIntentException) e;
@@ -148,6 +147,6 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 		}
 	}
 
-	protected abstract IContainer createHazelcastContainer(JMSID id, Integer ka, Map<String, ?> parameters,
+	protected abstract IContainer createHazelcastContainer(JMSID id, Map<String, ?> parameters,
 			Config config) throws Exception;
 }

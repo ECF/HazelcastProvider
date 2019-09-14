@@ -28,10 +28,10 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		@Override
-		protected IContainer createHazelcastContainer(JMSID serverID, Integer ka,
+		protected IContainer createHazelcastContainer(JMSID serverID, 
 				@SuppressWarnings("rawtypes") Map props, Config config) throws Exception {
 			HazelcastManagerContainer sc = new HazelcastManagerContainer(
-					new JMSContainerConfig(serverID, ka.intValue(), props), config);
+					new JMSContainerConfig(serverID, 0, props), config);
 			sc.start();
 			return sc;
 		}

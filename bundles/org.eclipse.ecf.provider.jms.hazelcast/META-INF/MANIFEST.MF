@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ECF Hazelcast Remote Services Provider
+Bundle-Name: ECF Hazelcast Distribution Provider
 Bundle-SymbolicName: org.eclipse.ecf.provider.jms.hazelcast
 Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: %bundle.provider

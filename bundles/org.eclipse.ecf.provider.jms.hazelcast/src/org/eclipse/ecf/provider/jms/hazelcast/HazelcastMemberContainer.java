@@ -29,9 +29,9 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		@Override
-		protected IContainer createHazelcastContainer(JMSID id, Integer ka, @SuppressWarnings("rawtypes") Map props,
+		protected IContainer createHazelcastContainer(JMSID id, @SuppressWarnings("rawtypes") Map props,
 				Config config) throws Exception {
-			return new HazelcastMemberContainer(new JMSContainerConfig(id, ka, props), config);
+			return new HazelcastMemberContainer(new JMSContainerConfig(id, 0, props), config);
 		}
 	}
 
