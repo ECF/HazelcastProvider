@@ -48,6 +48,8 @@ import com.hazelcast.core.MembershipListener;
 
 public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapter {
 
+	private static final String DEFAULT_MAP_NAME = "default";
+
 	// Hazelcast targetID (from HazelcastDiscoveryContainerConfig
 	private HazelcastServiceID targetID;
 	// Hazelcast instance
@@ -201,8 +203,15 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	}
 
 	private MembershipListener membershipListener = new MembershipAdapter() {
+
+		@Override
+		public void memberAdded(MembershipEvent membershipEvent) {
+			trace("memberAdded", "memberId=" + membershipEvent.getMember().getUuid());
+		};
+
 		@Override
 		public void memberRemoved(MembershipEvent membershipEvent) {
+			trace("memberRemoved", "memberId=" + membershipEvent.getMember().getUuid());
 			removeServicesForMember(membershipEvent.getMember().getUuid());
 		}
 	};
@@ -237,7 +246,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				this.hazelcastInstance = (hazelcastConfig == null) ? Hazelcast.newHazelcastInstance()
 						: Hazelcast.newHazelcastInstance(hazelcastConfig);
 				this.hazelcastInstance.getCluster().addMembershipListener(membershipListener);
-				this.hazelcastMap = this.hazelcastInstance.getMap("default");
+				this.hazelcastMap = this.hazelcastInstance.getMap(DEFAULT_MAP_NAME);
 			} catch (Exception e) {
 				throw new ContainerConnectException(
 						"Could not create hazelcast instance with hazelcastConfig=" + hazelcastConfig);
@@ -296,12 +305,11 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 			removedServices = services.values().stream().filter(si -> {
 				return (member == null) ? true : member.equals(si.getHazelcastId());
 			}).collect(Collectors.toList());
-			// Remove from cache
 			for (HazelcastServiceInfo si : removedServices) {
 				services.remove(si.getKey());
 			}
 		}
-		// Now notify
+		// Now notify about those that actually are removed
 		removedServices.forEach(si -> fireServiceUndiscovered(new ServiceContainerEvent(si, getID())));
 	}
 

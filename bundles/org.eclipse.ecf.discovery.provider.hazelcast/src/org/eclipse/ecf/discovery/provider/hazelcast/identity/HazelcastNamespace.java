@@ -27,7 +27,7 @@ public class HazelcastNamespace extends Namespace {
 	public static HazelcastNamespace INSTANCE;
 
 	public HazelcastNamespace() {
-		super(NAME, "Etcd Discovery Namespace"); //$NON-NLS-1$
+		super(NAME, "Hazelcast Discovery Namespace"); //$NON-NLS-1$
 		INSTANCE = this;
 	}
 
