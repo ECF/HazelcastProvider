@@ -1,5 +1,7 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
 	name="ecf-remoteservices-hazelcast-1.5.0">
+	
+    <repository>http://download.eclipse.org/rt/ecf/RELEASE/site.p2/karaf-features.xml</repository>
 
 	<feature name="ecf-rs-hazelcast-deps" version="1.5.0"
 		description="ECF Hazelcast Dependencies Support. See https://github.com/ECF/HazelcastProvider">
