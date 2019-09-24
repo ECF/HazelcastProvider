@@ -28,6 +28,7 @@ import org.eclipse.ecf.discovery.IServiceTypeListener;
 import org.eclipse.ecf.discovery.ServiceContainerEvent;
 import org.eclipse.ecf.discovery.identity.IServiceID;
 import org.eclipse.ecf.discovery.identity.IServiceTypeID;
+import org.eclipse.ecf.discovery.provider.hazelcast.Activator;
 import org.eclipse.ecf.discovery.provider.hazelcast.DebugOptions;
 import org.eclipse.ecf.discovery.provider.hazelcast.LogUtility;
 import org.eclipse.ecf.discovery.provider.hazelcast.identity.HazelcastNamespace;
@@ -37,25 +38,25 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.EntryListenerConfig;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.MembershipAdapter;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.hazelcast.osgi.HazelcastOSGiService;
 
 public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapter {
 
-	private static final String DEFAULT_MAP_NAME = "default";
+	private static final String DEFAULT_MAP_NAME = System
+			.getProperty(HazelcastDiscoveryContainer.class.getName() + ".defaultMapName", "default");
 
 	// Hazelcast targetID (from HazelcastDiscoveryContainerConfig
 	private HazelcastServiceID targetID;
 	// Hazelcast instance
 	private HazelcastInstance hazelcastInstance;
-	// Hazelcast map used to do service info distribution
+	// Map of serviceLocation (id) -> HazelcastServiceInfo
 	private IMap<String, HazelcastServiceInfo> hazelcastMap;
-	// Map of serviceLocation (id) -> HazelcastServiceInfo...local cache
 	// of hazelcastMap contents
 	private Map<String, HazelcastServiceInfo> services;
 
@@ -117,9 +118,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				return;
 			}
 			HazelcastServiceInfo localServiceInfo = createHazelcastServiceInfo(serviceInfo);
-			synchronized (services) {
-				this.hazelcastMap.put(localServiceInfo.getKey(), localServiceInfo);
-			}
+			this.hazelcastMap.put(localServiceInfo.getKey(), localServiceInfo);
 		}
 	}
 
@@ -130,9 +129,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				logError("unregisterService", "Hazelcast instance is null", new NullPointerException());
 				return;
 			}
-			synchronized (services) {
-				this.hazelcastMap.evict(createHazelcastServiceInfo(serviceInfo).getKey());
-			}
+			this.hazelcastMap.evict(createHazelcastServiceInfo(serviceInfo).getKey());
 		}
 	}
 
@@ -161,7 +158,11 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		@Override
 		public void entryAdded(EntryEvent<String, HazelcastServiceInfo> event) {
 			trace("entryAdded", "key=" + event.getKey() + ";" + event.getValue());
-			fireServiceInfoDiscovered(event.getValue());
+			HazelcastServiceInfo si = event.getValue();
+			synchronized (services) {
+				services.put(si.getKey(), si);
+			}
+			fireServiceDiscovered(si);
 		}
 
 		@Override
@@ -193,13 +194,6 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 			removeAllServiceInfos();
 		}
 	};
-
-	private void fireServiceInfoDiscovered(HazelcastServiceInfo s) {
-		synchronized (services) {
-			services.put(s.getKey(), s);
-		}
-		fireServiceDiscovered(new ServiceContainerEvent(s, getID()));
-	}
 
 	private void fireServiceInfoUndiscovered(String siKey) {
 		HazelcastServiceInfo si = services.remove(siKey);
@@ -250,10 +244,15 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 					.addEntryListenerConfig(new EntryListenerConfig(entryListener, true, true));
 		}
 
+		HazelcastOSGiService hazelcastOSGiService = Activator.getDefault().getHazelcastOSGiService();
+		if (hazelcastOSGiService == null) {
+			throw new ContainerConnectException("Cannot get HazelcastOSGiService to create Hazelcast discovery");
+		}
+
 		synchronized (services) {
 			try {
-				this.hazelcastInstance = (hazelcastConfig == null) ? Hazelcast.newHazelcastInstance()
-						: Hazelcast.newHazelcastInstance(hazelcastConfig);
+				this.hazelcastInstance = (hazelcastConfig == null) ? hazelcastOSGiService.newHazelcastInstance()
+						: hazelcastOSGiService.newHazelcastInstance(hazelcastConfig);
 				this.hazelcastInstance.getCluster().addMembershipListener(membershipListener);
 				this.hazelcastMap = this.hazelcastInstance.getMap(DEFAULT_MAP_NAME);
 			} catch (Exception e) {
@@ -275,14 +274,19 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		List<HazelcastServiceInfo> notify = null;
 		synchronized (services) {
 			if (!initialized) {
-				services.putAll(this.hazelcastMap);
-				initialized = true;
+				services.putAll(hazelcastMap);
 				notify = new ArrayList<HazelcastServiceInfo>(this.services.values());
+				initialized = true;
 			}
 		}
 		if (notify != null) {
-			notify.forEach(s -> fireServiceInfoDiscovered(s));
+			notify.forEach(s -> fireServiceDiscovered(s));
 		}
+	}
+
+	private void fireServiceDiscovered(HazelcastServiceInfo si) {
+		trace("fireServiceDiscovered", "hazelcastserviceinfo=" + si);
+		fireServiceDiscovered(new ServiceContainerEvent(si, getID()));
 	}
 
 	@Override
@@ -319,7 +323,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				}
 			}
 		}
-		addedServices.forEach(si -> fireServiceInfoDiscovered(si));
+		addedServices.forEach(si -> fireServiceDiscovered(si));
 	}
 
 	private void removeServiceInfosForMember(String member) {
@@ -344,7 +348,6 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 			if (this.hazelcastInstance != null) {
 				this.hazelcastInstance.shutdown();
 				this.hazelcastInstance = null;
-				this.hazelcastMap = null;
 				this.targetID = null;
 				this.initialized = false;
 			}

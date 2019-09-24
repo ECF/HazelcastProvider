@@ -18,6 +18,9 @@ import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider
 import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
+import com.hazelcast.osgi.HazelcastOSGiService;
 
 public class Activator implements BundleActivator {
 
@@ -27,8 +30,17 @@ public class Activator implements BundleActivator {
 	public static final String HAZELCAST_MANAGER_NAME = HAZELCAST_PREFIX + ".manager";
 	public static final String HAZELCAST_MEMBER_NAME = HAZELCAST_PREFIX + ".member";
 
+	private static Activator instance;
+	private static BundleContext context;
+
+	public static Activator getDefault() {
+		return instance;
+	}
+
 	@Override
 	public void start(final BundleContext context1) throws Exception {
+		instance = this;
+		this.context = context1;
 		// Build and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MANAGER_NAME)
@@ -49,8 +61,33 @@ public class Activator implements BundleActivator {
 				null);
 	}
 
+	private ServiceTracker<HazelcastOSGiService, HazelcastOSGiService> hazelcastTracker;
+
+	private static BundleContext getContext() {
+		return context;
+	}
+
+	public synchronized HazelcastOSGiService getHazelcastOSGiService() {
+		if (hazelcastTracker == null) {
+			hazelcastTracker = new ServiceTracker<HazelcastOSGiService, HazelcastOSGiService>(getContext(),
+					HazelcastOSGiService.class, null);
+			hazelcastTracker.open();
+		}
+		return hazelcastTracker.getService();
+	}
+
+	private synchronized void stopHazelcastOSGiService() {
+		if (hazelcastTracker != null) {
+			hazelcastTracker.close();
+			hazelcastTracker = null;
+		}
+	}
+
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		stopHazelcastOSGiService();
+		context = null;
+		instance = null;
 	}
 
 }

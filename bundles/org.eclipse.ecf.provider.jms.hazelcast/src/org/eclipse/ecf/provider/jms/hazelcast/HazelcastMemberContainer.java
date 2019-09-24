@@ -16,21 +16,22 @@ import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSClient;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.osgi.HazelcastOSGiService;
 
 public class HazelcastMemberContainer extends AbstractJMSClient {
 
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		@Override
-		protected IContainer createHazelcastContainer(JMSID id, @SuppressWarnings("rawtypes") Map props,
-				Config config) throws Exception {
+		protected IContainer createHazelcastContainer(JMSID id, @SuppressWarnings("rawtypes") Map props, Config config)
+				throws Exception {
 			return new HazelcastMemberContainer(new JMSContainerConfig(id, 0, props), config);
 		}
 	}
@@ -46,6 +47,10 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 	@Override
 	protected ISynchAsynchConnection createConnection(ID targetID, Object data) throws ConnectionCreateException {
 		if (this.hazelcastInstance == null) {
+			HazelcastOSGiService hazelcastOSGiService = Activator.getDefault().getHazelcastOSGiService();
+			if (hazelcastOSGiService == null) {
+				throw new ConnectionCreateException("Cannot get HazelcastOSGiService for member container connection");
+			}
 			if (this.hazelcastConfig != null) {
 				try {
 					HazelcastConfigUtil.ajustConfig(this.hazelcastConfig, targetID);
@@ -53,9 +58,9 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 					throw new ConnectionCreateException("Could not adjust hazelcastConfig with targetID=" + targetID,
 							e);
 				}
-				hazelcastInstance = Hazelcast.newHazelcastInstance(this.hazelcastConfig);
+				hazelcastInstance = hazelcastOSGiService.newHazelcastInstance(this.hazelcastConfig);
 			} else {
-				hazelcastInstance = Hazelcast.newHazelcastInstance();
+				hazelcastInstance = hazelcastOSGiService.newHazelcastInstance();
 			}
 			return new HazelcastMemberChannel(getReceiver(), hazelcastInstance);
 		} else

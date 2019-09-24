@@ -147,6 +147,6 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 		}
 	}
 
-	protected abstract IContainer createHazelcastContainer(JMSID id, Map<String, ?> parameters,
-			Config config) throws Exception;
+	protected abstract IContainer createHazelcastContainer(JMSID id, Map<String, ?> parameters, Config config)
+			throws Exception;
 }

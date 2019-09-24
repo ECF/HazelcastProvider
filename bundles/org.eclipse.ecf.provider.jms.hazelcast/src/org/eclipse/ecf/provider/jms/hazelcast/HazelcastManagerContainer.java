@@ -14,24 +14,26 @@ import java.util.Map;
 
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.util.ECFException;
+import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.osgi.HazelcastOSGiService;
 
 public class HazelcastManagerContainer extends AbstractJMSServer {
 
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		@Override
-		protected IContainer createHazelcastContainer(JMSID serverID, 
-				@SuppressWarnings("rawtypes") Map props, Config config) throws Exception {
-			HazelcastManagerContainer sc = new HazelcastManagerContainer(
-					new JMSContainerConfig(serverID, 0, props), config);
+		protected IContainer createHazelcastContainer(JMSID serverID, @SuppressWarnings("rawtypes") Map props,
+				Config config) throws Exception {
+			HazelcastManagerContainer sc = new HazelcastManagerContainer(new JMSContainerConfig(serverID, 0, props),
+					config);
 			sc.start();
 			return sc;
 		}
@@ -48,15 +50,19 @@ public class HazelcastManagerContainer extends AbstractJMSServer {
 	@Override
 	public void start() throws ECFException {
 		if (this.hazelcastInstance == null) {
+			HazelcastOSGiService hazelcastOSGiService = Activator.getDefault().getHazelcastOSGiService();
+			if (hazelcastOSGiService == null) {
+				throw new ConnectionCreateException("Cannot get HazelcastOSGiService for member container connection");
+			}
 			if (this.hazelcastConfig != null) {
 				try {
 					HazelcastConfigUtil.ajustConfig(this.hazelcastConfig, getID());
 				} catch (URISyntaxException e) {
 					throw new ECFException("Cannot start HazelcastManagerContainer", e);
 				}
-				this.hazelcastInstance = Hazelcast.newHazelcastInstance(this.hazelcastConfig);
+				this.hazelcastInstance = hazelcastOSGiService.newHazelcastInstance(this.hazelcastConfig);
 			} else {
-				this.hazelcastInstance = Hazelcast.newHazelcastInstance();
+				this.hazelcastInstance = hazelcastOSGiService.newHazelcastInstance();
 			}
 		}
 		final ISynchAsynchConnection connection = new HazelcastManagerChannel(this.getReceiver(),

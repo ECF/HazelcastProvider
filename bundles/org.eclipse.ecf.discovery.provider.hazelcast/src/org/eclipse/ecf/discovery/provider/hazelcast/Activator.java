@@ -37,6 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
+import com.hazelcast.osgi.HazelcastOSGiService;
 
 public class Activator implements BundleActivator {
 
@@ -74,6 +75,23 @@ public class Activator implements BundleActivator {
 	private HazelcastDiscoveryContainer container;
 	private ServiceTracker<IContainerFactory, IContainerFactory> cfTracker;
 
+	private ServiceTracker<HazelcastOSGiService,HazelcastOSGiService> hazelcastTracker;
+	
+	public synchronized HazelcastOSGiService getHazelcastOSGiService() {
+		if (hazelcastTracker == null) {
+			hazelcastTracker = new ServiceTracker<HazelcastOSGiService,HazelcastOSGiService>(getContext(),HazelcastOSGiService.class,null);
+			hazelcastTracker.open();
+		}
+		return hazelcastTracker.getService();
+	}
+	
+	private synchronized void stopHazelcastOSGiService() {
+		if (hazelcastTracker != null) {
+			hazelcastTracker.close();
+			hazelcastTracker = null;
+		}
+	}
+	
 	private Bundle findBundleForHazelcastConfig() throws BundleException {
 		if (HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME != null) {
 			Bundle candidate = null;
@@ -175,6 +193,7 @@ public class Activator implements BundleActivator {
 	}
 
 	public void stop(BundleContext context) throws Exception {
+		stopHazelcastOSGiService();
 		if (cfTracker != null) {
 			cfTracker.close();
 			cfTracker = null;
