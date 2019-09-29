@@ -118,7 +118,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				return;
 			}
 			HazelcastServiceInfo localServiceInfo = createHazelcastServiceInfo(serviceInfo);
-			this.hazelcastMap.put(localServiceInfo.getKey(), localServiceInfo);
+			this.hazelcastMap.set(localServiceInfo.getKey(), localServiceInfo);
 		}
 	}
 
