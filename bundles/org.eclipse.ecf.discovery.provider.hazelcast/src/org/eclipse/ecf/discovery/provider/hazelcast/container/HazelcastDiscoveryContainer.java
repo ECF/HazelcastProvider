@@ -42,6 +42,7 @@ import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.MembershipAdapter;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.hazelcast.core.ReplicatedMap;
 import com.hazelcast.osgi.HazelcastOSGiService;
 
 public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapter {
@@ -54,7 +55,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	// Hazelcast instance
 	private HazelcastInstance hazelcastInstance;
 	// Map of serviceLocation (id) -> HazelcastServiceInfo
-	private Map<String, HazelcastServiceInfo> services;
+	private ReplicatedMap<String,HazelcastServiceInfo> services;
 
 	public HazelcastDiscoveryContainer(HazelcastDiscoveryContainerConfig config) {
 		super(HazelcastNamespace.NAME, config);
@@ -239,7 +240,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		// Prepare hazelcast config with context class loader and entry listener
 		Config hazelcastConfig = config.getHazelcastConfig();
 		if (hazelcastConfig != null) {
-			hazelcastConfig.getMapConfig(DEFAULT_MAP_NAME)
+			hazelcastConfig.getReplicatedMapConfig(DEFAULT_MAP_NAME)
 					.addEntryListenerConfig(new EntryListenerConfig(entryListener, true, true));
 		}
 
