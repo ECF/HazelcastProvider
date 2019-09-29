@@ -159,10 +159,14 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		public void entryAdded(EntryEvent<String, HazelcastServiceInfo> event) {
 			trace("entryAdded", "key=" + event.getKey() + ";" + event.getValue());
 			HazelcastServiceInfo si = event.getValue();
+			boolean fire = false;
 			synchronized (services) {
 				services.put(si.getKey(), si);
+				fire = initialized;
 			}
-			fireServiceDiscovered(si);
+			if (fire) {
+				fireServiceDiscovered(si);
+			}
 		}
 
 		@Override
@@ -314,16 +318,21 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	private void addServiceInfoForMember(String member) {
 		trace("addServiceInfoForMember", "member=" + member);
 		List<HazelcastServiceInfo> allServices = null;
-		List<HazelcastServiceInfo> addedServices = new ArrayList<HazelcastServiceInfo>();
+		Map<String,HazelcastServiceInfo> addedServices = new HashMap<String,HazelcastServiceInfo>();
+		boolean fire = false;
 		synchronized (services) {
 			allServices = new ArrayList<HazelcastServiceInfo>(this.hazelcastMap.values());
-			for (HazelcastServiceInfo svc : allServices) {
-				if (svc.getMemberId().equals(member)) {
-					addedServices.add(svc);
+			for (HazelcastServiceInfo si : allServices) {
+				if (si.getMemberId().equals(member)) {
+					addedServices.put(si.getKey(),si);
 				}
 			}
+			services.putAll(addedServices);
+			fire = initialized;
 		}
-		addedServices.forEach(si -> fireServiceDiscovered(si));
+		if (fire) {
+			addedServices.values().forEach(si -> fireServiceDiscovered(si));
+		}
 	}
 
 	private void removeServiceInfosForMember(String member) {

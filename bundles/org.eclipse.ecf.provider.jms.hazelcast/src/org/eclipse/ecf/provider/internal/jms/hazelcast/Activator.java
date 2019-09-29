@@ -12,6 +12,7 @@ package org.eclipse.ecf.provider.internal.jms.hazelcast;
 
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastManagerContainer;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastMemberContainer;
+import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
 import org.eclipse.ecf.remoteservice.provider.AdapterConfig;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
@@ -40,7 +41,9 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(final BundleContext context1) throws Exception {
 		instance = this;
-		this.context = context1;
+		context = context1;
+		JMSNamespace ns = new JMSNamespace();
+		ns.getName();
 		// Build and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MANAGER_NAME)
