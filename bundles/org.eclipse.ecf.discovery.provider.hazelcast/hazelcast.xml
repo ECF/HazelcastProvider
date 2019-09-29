@@ -276,7 +276,7 @@
 
     <replicatedmap name="default">
         <in-memory-format>OBJECT</in-memory-format>
-        <async-fillup>true</async-fillup>
+        <async-fillup>false</async-fillup>
         <statistics-enabled>true</statistics-enabled>
         <merge-policy batch-size="100">com.hazelcast.spi.merge.PutIfAbsentMergePolicy</merge-policy>
     </replicatedmap>

@@ -262,7 +262,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				this.hazelcastInstance = (hazelcastConfig == null) ? hazelcastOSGiService.newHazelcastInstance()
 						: hazelcastOSGiService.newHazelcastInstance(hazelcastConfig);
 				this.hazelcastInstance.getCluster().addMembershipListener(membershipListener);
-				this.services = this.hazelcastInstance.getReplicatedMap(DEFAULT_MAP_NAME);
+				this.hazelcastReplicatedMap = this.hazelcastInstance.getReplicatedMap(DEFAULT_MAP_NAME);
 			} catch (Exception e) {
 				throw new ContainerConnectException(
 						"Could not create hazelcast instance with hazelcastConfig=" + hazelcastConfig);
