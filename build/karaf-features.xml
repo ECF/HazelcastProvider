@@ -17,16 +17,16 @@
 		<feature>ecf-rs-distribution-generic</feature>
 		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/javax.jms_1.1.0.v201205091237.jar
 		</bundle>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201909291130.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201909291136.jar
 		</bundle>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.2.201909291130.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.2.201909291136.jar
 		</bundle>
 	</feature>
 
 	<feature name="ecf-rs-discovery-hazelcast" version="1.5.3"
 		description="ECF Hazelcast Discovery Provider Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-hazelcast-deps</feature>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.3.201909291130.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.3.201909291136.jar
 		</bundle>
 	</feature>
 
