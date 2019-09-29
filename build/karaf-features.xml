@@ -17,7 +17,7 @@
 		<feature>ecf-rs-distribution-generic</feature>
 		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/javax.jms_1.1.0.v201205091237.jar
 		</bundle>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201806152009.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201909282300.jar
 		</bundle>
 		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.2.201909282300.jar
 		</bundle>
