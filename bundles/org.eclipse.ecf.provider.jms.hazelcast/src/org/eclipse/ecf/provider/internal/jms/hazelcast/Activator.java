@@ -12,7 +12,6 @@ package org.eclipse.ecf.provider.internal.jms.hazelcast;
 
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastManagerContainer;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastMemberContainer;
-import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
 import org.eclipse.ecf.remoteservice.provider.AdapterConfig;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
@@ -27,7 +26,8 @@ import com.hazelcast.osgi.HazelcastOSGiService;
 public class Activator implements BundleActivator {
 
 	public static final String ID = "org.eclipse.ecf.provider.jms.hazelcast";
-
+	private static final String DEPENDENT_BUNDLE = "org.eclipse.ecf.provider.jms";
+	
 	public static final String HAZELCAST_PREFIX = "ecf.jms.hazelcast";
 	public static final String HAZELCAST_MANAGER_NAME = HAZELCAST_PREFIX + ".manager";
 	public static final String HAZELCAST_MEMBER_NAME = HAZELCAST_PREFIX + ".member";
@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
 		instance = this;
 		context = context1;
 		for(Bundle b: context.getBundles()) {
-			if (b.getSymbolicName().equals("org.eclipse.ecf.provider.jms")) {
+			if (b.getSymbolicName().equals(DEPENDENT_BUNDLE)) {
 				b.start();
 			}
 		}

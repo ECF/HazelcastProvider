@@ -17,6 +17,7 @@ import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.security.IConnectContext;
 import org.eclipse.ecf.provider.comm.ConnectionCreateException;
+import org.eclipse.ecf.provider.comm.IConnection;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSClient;
@@ -47,14 +48,11 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 	}
 
 	@Override
-	public void connect(ID targetID, IConnectContext joinContext) throws ContainerConnectException {
-		try {
-		super.connect(targetID, joinContext);
-		} catch (Exception e) {
-			System.out.println("targetID="+targetID);
-			throw e;
-		}
+	protected void disconnect(IConnection conn) {
+		super.disconnect(conn);
+		disconnectHazelcast();
 	}
+	
 	@Override
 	protected ISynchAsynchConnection createConnection(ID targetID, Object data) throws ConnectionCreateException {
 		if (this.hazelcastInstance == null) {
@@ -78,12 +76,16 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 			throw new ConnectionCreateException("Cannot connect because already have hazelcast instance");
 	}
 
-	@Override
-	public void disconnect() {
-		super.disconnect();
+	private void disconnectHazelcast() {
 		if (this.hazelcastInstance != null) {
 			this.hazelcastInstance.shutdown();
 			this.hazelcastInstance = null;
 		}
+	}
+	
+	@Override
+	public void disconnect() {
+		super.disconnect();
+		disconnectHazelcast();
 	}
 }
