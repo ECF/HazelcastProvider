@@ -10,6 +10,7 @@
  *****************************************************************************/
 package org.eclipse.ecf.provider.internal.jms.hazelcast;
 
+import org.eclipse.ecf.core.util.BundleStarter;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastManagerContainer;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastMemberContainer;
 import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
@@ -26,8 +27,8 @@ import com.hazelcast.osgi.HazelcastOSGiService;
 public class Activator implements BundleActivator {
 
 	public static final String ID = "org.eclipse.ecf.provider.jms.hazelcast";
-	private static final String DEPENDENT_BUNDLE = "org.eclipse.ecf.provider.jms";
-	
+	private static final String[] DEPENDENT_BUNDLES = new String[] { "org.eclipse.ecf.provider.jms", "com.hazelcast" };
+
 	public static final String HAZELCAST_PREFIX = "ecf.jms.hazelcast";
 	public static final String HAZELCAST_MANAGER_NAME = HAZELCAST_PREFIX + ".manager";
 	public static final String HAZELCAST_MEMBER_NAME = HAZELCAST_PREFIX + ".member";
@@ -43,11 +44,7 @@ public class Activator implements BundleActivator {
 	public void start(final BundleContext context1) throws Exception {
 		instance = this;
 		context = context1;
-		for(Bundle b: context.getBundles()) {
-			if (b.getSymbolicName().equals(DEPENDENT_BUNDLE)) {
-				b.start();
-			}
-		}
+		BundleStarter.startDependents(context1, DEPENDENT_BUNDLES, Bundle.RESOLVED | Bundle.STARTING);
 		// Build and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MANAGER_NAME)
@@ -61,7 +58,7 @@ public class Activator implements BundleActivator {
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MEMBER_NAME)
 						.setInstantiator(new HazelcastMemberContainer.Instantiator())
-						.setDescription("ECF Hazelcast Member")
+						.setDescription("ECF Hazelcast Member").setServer(true)
 						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
 								HazelcastMemberContainer.class))
 						.build(),

@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainerFactory;
 import org.eclipse.ecf.core.identity.IDFactory;
+import org.eclipse.ecf.core.util.BundleStarter;
 import org.eclipse.ecf.core.util.LogHelper;
 import org.eclipse.ecf.core.util.SystemLogService;
 import org.eclipse.ecf.discovery.IDiscoveryAdvertiser;
@@ -42,6 +43,8 @@ import com.hazelcast.osgi.HazelcastOSGiService;
 public class Activator implements BundleActivator {
 
 	public static final String PLUGIN_ID = "org.eclipse.ecf.discovery.provider.hazelcast"; //$NON-NLS-1$
+
+	private static final String[] DEPENDENT_BUNDLES = new String[] { "com.hazelcast" };
 
 	private static final boolean HAZELCAST_ENABLED = Boolean
 			.valueOf(System.getProperty(HazelcastDiscoveryContainerInstantiator.NAME + ".enabled", "true"))
@@ -75,23 +78,24 @@ public class Activator implements BundleActivator {
 	private HazelcastDiscoveryContainer container;
 	private ServiceTracker<IContainerFactory, IContainerFactory> cfTracker;
 
-	private ServiceTracker<HazelcastOSGiService,HazelcastOSGiService> hazelcastTracker;
-	
+	private ServiceTracker<HazelcastOSGiService, HazelcastOSGiService> hazelcastTracker;
+
 	public synchronized HazelcastOSGiService getHazelcastOSGiService() {
 		if (hazelcastTracker == null) {
-			hazelcastTracker = new ServiceTracker<HazelcastOSGiService,HazelcastOSGiService>(getContext(),HazelcastOSGiService.class,null);
+			hazelcastTracker = new ServiceTracker<HazelcastOSGiService, HazelcastOSGiService>(getContext(),
+					HazelcastOSGiService.class, null);
 			hazelcastTracker.open();
 		}
 		return hazelcastTracker.getService();
 	}
-	
+
 	private synchronized void stopHazelcastOSGiService() {
 		if (hazelcastTracker != null) {
 			hazelcastTracker.close();
 			hazelcastTracker = null;
 		}
 	}
-	
+
 	private Bundle findBundleForHazelcastConfig() throws BundleException {
 		if (HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME != null) {
 			Bundle candidate = null;
@@ -124,6 +128,7 @@ public class Activator implements BundleActivator {
 		context = ctxt;
 
 		if (HAZELCAST_ENABLED) {
+			BundleStarter.startDependents(ctxt, DEPENDENT_BUNDLES, Bundle.RESOLVED | Bundle.STARTING);
 			// Get URL given system props (constants above)
 			URL hazelcastConfigFile = getURLWithHazelcastConfig();
 			// Register Namespace and ContainerTypeDescription first

@@ -52,7 +52,7 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 		super.disconnect(conn);
 		disconnectHazelcast();
 	}
-	
+
 	@Override
 	protected ISynchAsynchConnection createConnection(ID targetID, Object data) throws ConnectionCreateException {
 		if (this.hazelcastInstance == null) {
@@ -82,7 +82,7 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 			this.hazelcastInstance = null;
 		}
 	}
-	
+
 	@Override
 	public void disconnect() {
 		super.disconnect();
