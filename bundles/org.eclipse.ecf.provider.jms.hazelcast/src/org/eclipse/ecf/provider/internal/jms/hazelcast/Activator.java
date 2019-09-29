@@ -17,6 +17,7 @@ import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdap
 import org.eclipse.ecf.remoteservice.provider.AdapterConfig;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
 import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -42,8 +43,11 @@ public class Activator implements BundleActivator {
 	public void start(final BundleContext context1) throws Exception {
 		instance = this;
 		context = context1;
-		JMSNamespace ns = new JMSNamespace();
-		ns.getName();
+		for(Bundle b: context.getBundles()) {
+			if (b.getSymbolicName().equals("org.eclipse.ecf.provider.jms")) {
+				b.start();
+			}
+		}
 		// Build and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MANAGER_NAME)
