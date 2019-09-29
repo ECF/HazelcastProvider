@@ -12,8 +12,10 @@ package org.eclipse.ecf.provider.jms.hazelcast;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
+import org.eclipse.ecf.core.security.IConnectContext;
 import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
@@ -44,6 +46,15 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 		this.hazelcastConfig = hazelcastConfig;
 	}
 
+	@Override
+	public void connect(ID targetID, IConnectContext joinContext) throws ContainerConnectException {
+		try {
+		super.connect(targetID, joinContext);
+		} catch (Exception e) {
+			System.out.println("targetID="+targetID);
+			throw e;
+		}
+	}
 	@Override
 	protected ISynchAsynchConnection createConnection(ID targetID, Object data) throws ConnectionCreateException {
 		if (this.hazelcastInstance == null) {
