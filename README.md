@@ -157,7 +157,7 @@ This indicated that the consumer called the remote TimeService and received a re
 
 On the host console, you should see output like this:
 
-   karaf@root()> TimeServiceImpl:  Received call to getCurrentTime()
+    karaf@root()> TimeServiceImpl:  Received call to getCurrentTime()
    
 The code for the TimeService host is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.host/src/com/mycorp/examples/timeservice/host/TimeServiceImpl.java#n18)
 
