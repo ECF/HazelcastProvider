@@ -153,12 +153,12 @@ Notice the line
 
     karaf@root()> Current time on remote is: 1569811897139
 
-This indicated that the consumer called the remote TimeService and received a result of the current time.  The code for the consumer is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.consumer.ds.async/src/com/mycorp/examples/timeservice/consumer/ds/async/TimeServiceComponentAsync.java#n24)
+This indicated that the consumer called the remote TimeService and received a result of the current time.  The code for the consumer class is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.consumer.ds/src/com/mycorp/examples/timeservice/consumer/ds/TimeServiceComponent.java#n21)
 
 On the host console, you should see output like this:
 
     karaf@root()> TimeServiceImpl:  Received call to getCurrentTime()
    
-The code for the TimeService host is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.host/src/com/mycorp/examples/timeservice/host/TimeServiceImpl.java#n18)
+The code for the TimeServiceIMpl class is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.host/src/com/mycorp/examples/timeservice/host/TimeServiceImpl.java#n18)
 
 
