@@ -29,124 +29,67 @@ To install the ECF Remote Services implementation, and the Hazelcast Discovery a
 In one instance of Karaf, type this at the console
 
     karaf@root()> feature:repo-add https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
-    
-This will produce output like the following, showing the install of ECF Remote Services, and the Hazelcast providers
-
     Adding feature url https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
-    karaf@root()> feature:install -v ecf-rs-hazelcast
-    Adding features: ecf-rs-hazelcast/[1.5.3,1.5.3]
-        Changes to perform:
-      Region: root
-        Bundles to install:
-        mvn:com.hazelcast/hazelcast/3.12.2
-        mvn:javax.el/javax.el-api/3.0.0
-        mvn:javax.enterprise/cdi-api/1.2
-        mvn:javax.interceptor/javax.interceptor-api/1.2
-        https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/javax.jms_1.1.0.v201205091237.jar
-        mvn:javax.transaction/javax.transaction-api/1.2
-        mvn:org.apache.felix/org.apache.felix.scr/2.1.16
-        mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/4.2.6
-        mvn:org.apache.karaf.scr/org.apache.karaf.scr.state/4.2.6
-        mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2
-        mvn:org.eclipse.platform/org.eclipse.core.jobs/3.9.3
-        mvn:org.eclipse.ecf/org.eclipse.ecf/3.9.3
-        mvn:org.eclipse.ecf/org.eclipse.ecf.console/1.3.0
-        mvn:org.eclipse.ecf/org.eclipse.ecf.discovery/5.0.300
-                                             
-                                                 https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.4.201909291340.jar
-      mvn:org.eclipse.ecf/org.eclipse.ecf.identity/3.9.1
-      mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.distribution/2.1.200
-      mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.remoteserviceadmin/4.6.800
-      mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.remoteserviceadmin.console/1.2.0
-      mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy/1.0.100
-      mvn:org.eclipse.ecf/org.eclipse.ecf.provider/4.8.0
-      
-          https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201806152009.jar
-           https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.3.201909291340.jar
-      mvn:org.eclipse.ecf/org.eclipse.ecf.provider.remoteservice/4.4.100
-      mvn:org.eclipse.ecf/org.eclipse.ecf.remoteservice/8.13.1
-      mvn:org.eclipse.ecf/org.eclipse.ecf.remoteservice.asyncproxy/2.1.0
-      mvn:org.eclipse.ecf/org.eclipse.ecf.sharedobject/2.6.0
-      mvn:org.eclipse.platform/org.eclipse.equinox.common/3.9.0
-      mvn:org.eclipse.platform/org.eclipse.equinox.concurrent/1.1.0
-      mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.7.0
-      mvn:org.eclipse.ecf/org.eclipse.osgi.services.remoteserviceadmin/1.6.200
-      mvn:org.ops4j.pax.transx/pax-transx-tm-api/0.4.3
-      mvn:org.osgi/org.osgi.util.function/1.0.0
-      mvn:org.osgi/org.osgi.util.promise/1.0.0
-Installing bundles:
-  mvn:com.hazelcast/hazelcast/3.12.2
-  mvn:javax.el/javax.el-api/3.0.0
-  mvn:javax.enterprise/cdi-api/1.2
-  mvn:javax.interceptor/javax.interceptor-api/1.2
-  https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/javax.jms_1.1.0.v201205091237.jar
-  mvn:javax.transaction/javax.transaction-api/1.2
-  mvn:org.apache.felix/org.apache.felix.scr/2.1.16
-  mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/4.2.6
-  mvn:org.apache.karaf.scr/org.apache.karaf.scr.state/4.2.6
-  mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2
-  mvn:org.eclipse.platform/org.eclipse.core.jobs/3.9.3
-  mvn:org.eclipse.ecf/org.eclipse.ecf/3.9.3
-  mvn:org.eclipse.ecf/org.eclipse.ecf.console/1.3.0
-  mvn:org.eclipse.ecf/org.eclipse.ecf.discovery/5.0.300
-  https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.4.201909291340.jar
-  mvn:org.eclipse.ecf/org.eclipse.ecf.identity/3.9.1
-  mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.distribution/2.1.200
-  mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.remoteserviceadmin/4.6.800
-  mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.remoteserviceadmin.console/1.2.0
-  mvn:org.eclipse.ecf/org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy/1.0.100
-  mvn:org.eclipse.ecf/org.eclipse.ecf.provider/4.8.0
-  https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201806152009.jar
-  https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.2.3.201909291340.jar
-  mvn:org.eclipse.ecf/org.eclipse.ecf.provider.remoteservice/4.4.100
-  mvn:org.eclipse.ecf/org.eclipse.ecf.remoteservice/8.13.1
-  mvn:org.eclipse.ecf/org.eclipse.ecf.remoteservice.asyncproxy/2.1.0
-  mvn:org.eclipse.ecf/org.eclipse.ecf.sharedobject/2.6.0
-  mvn:org.eclipse.platform/org.eclipse.equinox.common/3.9.0
-  mvn:org.eclipse.platform/org.eclipse.equinox.concurrent/1.1.0
-  mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.7.0
-  mvn:org.eclipse.ecf/org.eclipse.osgi.services.remoteserviceadmin/1.6.200
-  mvn:org.ops4j.pax.transx/pax-transx-tm-api/0.4.3
-  mvn:org.osgi/org.osgi.util.function/1.0.0
-  mvn:org.osgi/org.osgi.util.promise/1.0.0
-Starting bundles:
-  com.hazelcast/3.12.2
-  org.osgi.util.function/1.0.0.201505202023
-  org.osgi.util.promise/1.0.0.201505202023
-  org.apache.felix.scr/2.1.16
-  org.apache.karaf.scr.management/4.2.6
-  org.apache.karaf.scr.state/4.2.6
-  javax.el-api/3.0.0
-  org.apache.servicemix.bundles.javax-inject/1.0.0.2
-  javax.interceptor-api/1.2.0
-  javax.enterprise.cdi-api/1.2.0
-  javax.transaction-api/1.2.0
-  javax.jms/1.1.0.v201205091237
-  org.eclipse.equinox.supplement/1.7.0.v20170329-1416
-  org.eclipse.equinox.common/3.9.0.v20170207-1454
-  org.eclipse.equinox.concurrent/1.1.0.v20130327-1442
-  org.eclipse.ecf.remoteservice.asyncproxy/2.1.0.v20180409-2248
-  org.eclipse.core.jobs/3.9.3.v20180115-1757
-  org.eclipse.ecf.identity/3.9.1.v20180810-0833
-  org.eclipse.ecf.discovery/5.0.300.v20180306-0211
-  org.eclipse.osgi.services.remoteserviceadmin/1.6.200.v20180301-0016
-  org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy/1.0.100.v20180301-0016
-  org.eclipse.ecf.provider.jms/1.10.100.201806152009
-  org.ops4j.pax.transx.pax-transx-tm-api/0.4.3
-  org.eclipse.ecf.console/1.3.0.v20180713-1805
-  org.eclipse.ecf.discovery.provider.hazelcast/1.0.4.201909291340
-  org.eclipse.ecf.osgi.services.remoteserviceadmin/4.6.800.v20180518-0149
-  org.eclipse.ecf.osgi.services.distribution/2.1.200.v20180301-0016
-  org.eclipse.ecf.remoteservice/8.13.1.v20180801-1752
-  org.eclipse.ecf.provider.remoteservice/4.4.100.v20180516-2213
-  org.eclipse.ecf.provider/4.8.0.v20180402-2103
-  org.eclipse.ecf/3.9.3.v20181012-2016
-  org.eclipse.ecf.sharedobject/2.6.0.v20180404-2345
-  org.eclipse.ecf.provider.jms.hazelcast/1.2.3.201909291340
-  org.eclipse.ecf.osgi.services.remoteserviceadmin.console/1.2.0.v20180713-1805
-Done.
+    
+Then type this command to install ECF Remote Services, and the Hazelcast providers
 
+    karaf@root()> feature:install ecf-rs-hazelcast
 
+Type this command to conigure the Timeservice Host to use the Hazelcast manager distribution provider
 
+    karaf@root()> system:property -p service.exported.configs ecf.jms.hazelcast.manager
+    
+Finally, to install and export the TimeService host type
+
+    feature:install ecf-rs-examples-timeservice-host 
+    
+This should produce output like the following, indicating that the TimeService host was successfully exported
+
+```karaf@root()> feature:install ecf-rs-examples-timeservice-host
+19:41:09.134;EXPORT_REGISTRATION;exportedSR=[com.mycorp.examples.timeservice.ITimeService];cID=JMSID[hazelcast://localhost/defaultRemoteServicesTopic];rsId=1
+--Endpoint Description---
+<endpoint-descriptions xmlns="http://www.osgi.org/xmlns/rsa/v1.0.0">
+  <endpoint-description>
+    <property name="ecf.endpoint.id" value-type="String" value="hazelcast://localhost/defaultRemoteServicesTopic"/>
+    <property name="ecf.endpoint.id.ns" value-type="String" value="ecf.namespace.jmsid"/>
+    <property name="ecf.endpoint.ts" value-type="Long" value="1569811269048"/>
+    <property name="ecf.exported.async.interfaces" value-type="String" value="*"/>
+    <property name="ecf.rsvc.id" value-type="Long" value="1"/>
+    <property name="endpoint.framework.uuid" value-type="String" value="1c5bf449-700a-4322-bf2b-850724f3a65c"/>
+    <property name="endpoint.id" value-type="String" value="eb4fb828-5dd7-4e22-85aa-906f3dad1d5e"/>
+    <property name="endpoint.package.version.com.mycorp.examples.timeservice" value-type="String" value="2.0.0"/>
+    <property name="endpoint.service.id" value-type="Long" value="136"/>
+    <property name="objectClass" value-type="String">
+      <array>
+        <value>com.mycorp.examples.timeservice.ITimeService</value>
+      </array>
+    </property>
+    <property name="remote.configs.supported" value-type="String">
+      <array>
+        <value>ecf.jms.hazelcast.manager</value>
+      </array>
+    </property>
+    <property name="remote.intents.supported" value-type="String">
+      <array>
+        <value>osgi.basic</value>
+        <value>passByValue</value>
+        <value>exactlyOnce</value>
+        <value>ordered</value>
+        <value>osgi.async</value>
+        <value>hazelcast</value>
+      </array>
+    </property>
+    <property name="service.imported" value-type="String" value="true"/>
+    <property name="service.imported.configs" value-type="String">
+      <array>
+        <value>ecf.jms.hazelcast.manager</value>
+      </array>
+    </property>
+  </endpoint-description>
+</endpoint-descriptions>
+---End Endpoint Description
+TimeService host registered with registration=org.apache.felix.framework.ServiceRegistrationImpl@19fe5be4
+karaf@root()>     
+```
 
 
