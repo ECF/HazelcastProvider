@@ -159,6 +159,6 @@ On the host console, you should see output like this:
 
     karaf@root()> TimeServiceImpl:  Received call to getCurrentTime()
    
-The code for the TimeServiceIMpl class is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.host/src/com/mycorp/examples/timeservice/host/TimeServiceImpl.java#n18)
+The code for the TimeServiceImpl class is [here](https://git.eclipse.org/c/ecf/org.eclipse.ecf.git/tree/examples/bundles/com.mycorp.examples.timeservice.host/src/com/mycorp/examples/timeservice/host/TimeServiceImpl.java#n18)
 
 
