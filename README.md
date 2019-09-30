@@ -39,13 +39,10 @@ Type this command to conigure the Timeservice Host to use the Hazelcast manager 
 
     karaf@root()> system:property -p service.exported.configs ecf.jms.hazelcast.manager
     
-Finally, to install and export the TimeService host type
+Finally, to install, start and export the TimeService host type
 
-    feature:install ecf-rs-examples-timeservice-host 
-    
-This should produce output like the following, indicating that the TimeService host was successfully exported
-
-```karaf@root()> feature:install ecf-rs-examples-timeservice-host
+```feature:install ecf-rs-examples-timeservice-host 
+karaf@root()> feature:install ecf-rs-examples-timeservice-host
 19:41:09.134;EXPORT_REGISTRATION;exportedSR=[com.mycorp.examples.timeservice.ITimeService];cID=JMSID[hazelcast://localhost/defaultRemoteServicesTopic];rsId=1
 --Endpoint Description---
 <endpoint-descriptions xmlns="http://www.osgi.org/xmlns/rsa/v1.0.0">
