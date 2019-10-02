@@ -24,7 +24,7 @@ public class HazelcastDiscoveryContainerInstantiator implements IContainerInstan
 		try {
 			return new HazelcastDiscoveryContainer((config == null) ? new HazelcastDiscoveryContainerConfig() : config);
 		} catch (Exception e) {
-			ContainerCreateException cce = new ContainerCreateException("Could not create etcd discovery container", e); //$NON-NLS-1$
+			ContainerCreateException cce = new ContainerCreateException("Could not create hazelcast discovery container", e); //$NON-NLS-1$
 			cce.setStackTrace(e.getStackTrace());
 			throw cce;
 		}

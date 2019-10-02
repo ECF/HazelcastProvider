@@ -11,9 +11,9 @@
 package org.eclipse.ecf.provider.internal.jms.hazelcast;
 
 import org.eclipse.ecf.core.util.BundleStarter;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.IHostContainerSelector;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastManagerContainer;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastMemberContainer;
-import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
 import org.eclipse.ecf.remoteservice.provider.AdapterConfig;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
 import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
@@ -45,12 +45,19 @@ public class Activator implements BundleActivator {
 		instance = this;
 		context = context1;
 		BundleStarter.startDependents(context1, DEPENDENT_BUNDLES, Bundle.RESOLVED | Bundle.STARTING);
+
+		// Register our impl of the IHostContainerSelector service, to override the
+		// default RSA one
+		context1.registerService(IHostContainerSelector.class,
+				new HazelcastHostContainerSelector(new String[] { HAZELCAST_MANAGER_NAME, HAZELCAST_MEMBER_NAME }),
+				null);
+
 		// Build and register hazelcast manager distribution provider
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MANAGER_NAME)
 						.setInstantiator(new HazelcastManagerContainer.Instantiator())
 						.setDescription("ECF Hazelcast Manager").setServer(true)
-						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+						.setAdapterConfig(new AdapterConfig(new HazelcastRemoteServiceContainerAdapterFactory(),
 								HazelcastManagerContainer.class))
 						.build(),
 				null);
@@ -58,8 +65,8 @@ public class Activator implements BundleActivator {
 		context1.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(HAZELCAST_MEMBER_NAME)
 						.setInstantiator(new HazelcastMemberContainer.Instantiator())
-						.setDescription("ECF Hazelcast Member").setServer(true)
-						.setAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+						.setDescription("ECF Hazelcast Member").setServer(false)
+						.setAdapterConfig(new AdapterConfig(new HazelcastRemoteServiceContainerAdapterFactory(),
 								HazelcastMemberContainer.class))
 						.build(),
 				null);

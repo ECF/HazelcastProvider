@@ -15,20 +15,24 @@ import java.util.Map;
 import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
-import org.eclipse.ecf.core.security.IConnectContext;
 import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.IConnection;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.HazelcastImportHelper;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSClient;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
+import org.eclipse.ecf.remoteservice.IRSAConsumerContainerAdapter;
+import org.eclipse.ecf.remoteservice.IRemoteServiceContainerAdapter;
+import org.eclipse.ecf.remoteservice.IRemoteServiceReference;
+import org.osgi.framework.InvalidSyntaxException;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.osgi.HazelcastOSGiService;
 
-public class HazelcastMemberContainer extends AbstractJMSClient {
+public class HazelcastMemberContainer extends AbstractJMSClient implements IRSAConsumerContainerAdapter {
 
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
@@ -41,10 +45,12 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 
 	private final Config hazelcastConfig;
 	private HazelcastInstance hazelcastInstance;
+	private HazelcastImportHelper importHelper;
 
 	protected HazelcastMemberContainer(JMSContainerConfig config, Config hazelcastConfig) {
 		super(config);
 		this.hazelcastConfig = hazelcastConfig;
+		this.importHelper = new HazelcastImportHelper();
 	}
 
 	@Override
@@ -88,4 +94,13 @@ public class HazelcastMemberContainer extends AbstractJMSClient {
 		super.disconnect();
 		disconnectHazelcast();
 	}
+
+	@Override
+	public IRemoteServiceReference[] importEndpoint(Map<String, Object> endpointDescriptionProperties)
+			throws ContainerConnectException, InvalidSyntaxException {
+		return importHelper.getRemoteServiceReferences(
+				(IRemoteServiceContainerAdapter) getAdapter(IRemoteServiceContainerAdapter.class), null,
+				endpointDescriptionProperties);
+	}
+
 }

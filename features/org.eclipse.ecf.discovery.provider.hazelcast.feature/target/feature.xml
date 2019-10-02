@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.ecf.discovery.provider.hazelcast.feature"
       label="ECF Hazelcast Discovery Feature"
-      version="1.5.0.v20190913-1846"
+      version="1.5.4.v20191002-0351"
       provider-name="Eclipse.org - ECF">
 
    <description url="http://www.example.com/description">
@@ -19,9 +19,9 @@
 
    <plugin
          id="org.eclipse.ecf.discovery.provider.hazelcast"
-         download-size="24"
-         install-size="54"
-         version="1.0.0.v20190913-1842"
+         download-size="31"
+         install-size="77"
+         version="1.0.4.v20191002-0351"
          unpack="false"/>
 
    <plugin
