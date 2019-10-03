@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?artifactRepository version='1.1.0'?>
 <artifacts size='1'>
-  <artifact classifier='org.eclipse.update.feature' id='org.eclipse.ecf.discovery.provider.hazelcast.feature' version='1.5.4.v20191002-0351'>
+  <artifact classifier='org.eclipse.update.feature' id='org.eclipse.ecf.discovery.provider.hazelcast.feature' version='1.5.4.v20191002-0415'>
     <properties size='6'>
       <property name='artifact.size' value='823'/>
       <property name='download.size' value='823'/>

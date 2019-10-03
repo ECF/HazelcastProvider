@@ -29,7 +29,7 @@ public class HazelcastRemoteServiceContainerAdapterFactory extends AbstractShare
 			if (container instanceof HazelcastManagerContainer) {
 				return new HazelcastManagerRegistrySharedObject((HazelcastManagerContainer) container);
 			} else if (container instanceof HazelcastMemberContainer) {
-
+				return new HazelcastMemberRegistrySharedObject((HazelcastMemberContainer) container);
 			}
 			return new RegistrySharedObject();
 		}
