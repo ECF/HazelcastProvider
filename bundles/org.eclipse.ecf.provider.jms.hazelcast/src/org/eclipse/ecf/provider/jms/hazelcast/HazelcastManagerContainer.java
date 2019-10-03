@@ -14,11 +14,12 @@ import java.util.Map;
 
 import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.IContainer;
+import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.EndpointDescription;
 import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
-import org.eclipse.ecf.provider.internal.jms.hazelcast.HazelcastImportHelper;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
@@ -47,12 +48,10 @@ public class HazelcastManagerContainer extends AbstractJMSServer implements IRSA
 
 	private final Config hazelcastConfig;
 	private HazelcastInstance hazelcastInstance;
-	private final HazelcastImportHelper importHelper;
 
 	protected HazelcastManagerContainer(JMSContainerConfig config, Config hazelcastConfig) {
 		super(config);
 		this.hazelcastConfig = hazelcastConfig;
-		this.importHelper = new HazelcastImportHelper();
 	}
 
 	@Override
@@ -101,9 +100,15 @@ public class HazelcastManagerContainer extends AbstractJMSServer implements IRSA
 	@Override
 	public IRemoteServiceReference[] importEndpoint(Map<String, Object> endpointDescriptionProperties)
 			throws ContainerConnectException, InvalidSyntaxException {
-		return importHelper.getRemoteServiceReferences(
-				(IRemoteServiceContainerAdapter) getAdapter(IRemoteServiceContainerAdapter.class), getID(),
-				endpointDescriptionProperties);
+		EndpointDescription ed = new EndpointDescription(endpointDescriptionProperties);
+		Long rsId = ed.getRemoteServiceId();
+		String filter = new StringBuffer("(&(") //$NON-NLS-1$
+				.append(org.eclipse.ecf.remoteservice.Constants.SERVICE_ID).append("=").append(rsId).append(")") //$NON-NLS-1$ //$NON-NLS-2$
+				.append(")").toString();
+		IRemoteServiceContainerAdapter adapter = (IRemoteServiceContainerAdapter) getAdapter(
+				IRemoteServiceContainerAdapter.class);
+		return adapter.getRemoteServiceReferences(getID(), new ID[] { ed.getContainerID() },
+				ed.getInterfaces().iterator().next(), filter);
 	}
 
 }
