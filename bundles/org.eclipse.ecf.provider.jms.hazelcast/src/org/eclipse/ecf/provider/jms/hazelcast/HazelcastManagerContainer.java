@@ -20,6 +20,8 @@ import org.eclipse.ecf.osgi.services.remoteserviceadmin.EndpointDescription;
 import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.DebugOptions;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.LogUtility;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
@@ -67,10 +69,15 @@ public class HazelcastManagerContainer extends AbstractJMSServer implements IRSA
 				} catch (URISyntaxException e) {
 					throw new ECFException("Cannot start HazelcastManagerContainer", e);
 				}
+				LogUtility.trace("start", DebugOptions.MANAGER, this.getClass(),
+						"Creating Hazelcast instance with config=" + this.hazelcastConfig);
 				this.hazelcastInstance = hazelcastOSGiService.newHazelcastInstance(this.hazelcastConfig);
 			} else {
+				LogUtility.trace("start", DebugOptions.MANAGER, this.getClass(),
+						"Creating Hazelcast instance with default config");
 				this.hazelcastInstance = hazelcastOSGiService.newHazelcastInstance();
 			}
+			LogUtility.trace("start", DebugOptions.MANAGER, this.getClass(), "Hazelcast instance created");
 		}
 		final ISynchAsynchConnection connection = new HazelcastManagerChannel(this.getReceiver(),
 				this.hazelcastInstance);
@@ -92,8 +99,10 @@ public class HazelcastManagerContainer extends AbstractJMSServer implements IRSA
 			conn.disconnect();
 		setConnection(null);
 		if (hazelcastInstance != null) {
+			LogUtility.trace("disconnect", DebugOptions.MANAGER, this.getClass(), "Shutting down Hazelcast instance");
 			this.hazelcastInstance.shutdown();
 			this.hazelcastInstance = null;
+			LogUtility.trace("disconnect", DebugOptions.MANAGER, this.getClass(), "Hazelcast instance shutdown");
 		}
 	}
 

@@ -10,7 +10,10 @@
  *****************************************************************************/
 package org.eclipse.ecf.provider.internal.jms.hazelcast;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ecf.core.util.BundleStarter;
+import org.eclipse.ecf.core.util.LogHelper;
+import org.eclipse.ecf.core.util.SystemLogService;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.IHostContainerSelector;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastManagerContainer;
 import org.eclipse.ecf.provider.jms.hazelcast.HazelcastMemberContainer;
@@ -20,6 +23,8 @@ import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.hazelcast.osgi.HazelcastOSGiService;
@@ -35,6 +40,9 @@ public class Activator implements BundleActivator {
 
 	private static Activator instance;
 	private static BundleContext context;
+
+	private ServiceTracker<LogService, LogService> logServiceTracker = null;
+	private LogService logService = null;
 
 	public static Activator getDefault() {
 		return instance;
@@ -99,6 +107,37 @@ public class Activator implements BundleActivator {
 		stopHazelcastOSGiService();
 		context = null;
 		instance = null;
+	}
+
+	public LogService getLogService() {
+		if (logServiceTracker == null) {
+			logServiceTracker = new ServiceTracker<LogService, LogService>(context, LogService.class.getName(), null);
+			logServiceTracker.open();
+		}
+		logService = logServiceTracker.getService();
+		if (logService == null)
+			logService = new SystemLogService(ID);
+		return logService;
+	}
+
+	@SuppressWarnings("deprecation")
+	public void log(IStatus status) {
+		if (logService == null)
+			logService = getLogService();
+		if (logService != null)
+			logService.log(null, LogHelper.getLogCode(status), LogHelper.getLogMessage(status), status.getException());
+	}
+
+	public void log(@SuppressWarnings("rawtypes") ServiceReference sr, IStatus status) {
+		log(sr, LogHelper.getLogCode(status), LogHelper.getLogMessage(status), status.getException());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void log(@SuppressWarnings("rawtypes") ServiceReference sr, int level, String message, Throwable t) {
+		if (logService == null)
+			logService = getLogService();
+		if (logService != null)
+			logService.log(sr, level, message, t);
 	}
 
 }

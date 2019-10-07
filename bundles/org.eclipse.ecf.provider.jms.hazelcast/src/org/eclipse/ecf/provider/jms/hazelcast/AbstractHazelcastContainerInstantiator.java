@@ -26,6 +26,8 @@ import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.provider.ContainerIntentException;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.DebugOptions;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.LogUtility;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 import org.eclipse.ecf.remoteservice.provider.PeerRemoteServiceContainerInstantiator;
@@ -75,21 +77,41 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 
 	protected Config getConfigFromArg(Map<String, ?> parameters) throws Exception {
 		Object o = getParameterValue(parameters, CONFIG_PARAM, Object.class, null);
-		if (o instanceof Config)
-			return (Config) o;
-		else if (o instanceof InputStream)
+		if (o instanceof Config) {
+			Config config = (Config) o;
+			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+					"Loading Hazelcast config from exising config=" + config);
+			return config;
+		} else if (o instanceof InputStream) {
+			InputStream ins = (InputStream) o;
+			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+					"Loading Hazelcast config from inputstream=" + ins);
 			return new XmlConfigBuilder((InputStream) o).build();
-		else if (o instanceof URL)
-			return new UrlXmlConfig((URL) o);
-		else if (o instanceof String)
-			return new InMemoryXmlConfig((String) o);
+		} else if (o instanceof URL) {
+			URL url = (URL) o;
+			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+					"Loading Hazelcast config from url=" + url);
+			return new UrlXmlConfig(url);
+		} else if (o instanceof String) {
+			String str = (String) o;
+			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+					"Loading Hazelcast config from string=" + str);
+			return new InMemoryXmlConfig(str);
+		}
+		LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+				"Loading Hazelcast config default -Dhazelcast.config="
+						+ System.getProperty("hazelcast.config", "<default>"));
 		return new XmlConfigBuilder().build();
 	}
 
 	protected Config getURLConfigFromArg(Map<String, ?> parameters) throws Exception {
 		Object o = getParameterValue(parameters, CONFIGURL_PARAM, Object.class, null);
-		if (o instanceof String)
+		if (o instanceof String) {
+			URL url = new URL((String) o);
+			LogUtility.trace("getURLConfigFromArg", DebugOptions.DEBUG, this.getClass(),
+					"Using configURL=" + url + " for loading Hazelcast config");
 			return new UrlXmlConfig(new URL((String) o));
+		}
 		return null;
 	}
 
@@ -105,20 +127,28 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 		Object o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + CONFIGURL_PARAM);
 		Hashtable h = new Hashtable();
 		if (o != null) {
+			LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
+					"Setting member configURL to manager.configURL=" + o);
 			h.put(CONFIGURL_PARAM, o);
 		} else {
 			o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + CONFIG_PARAM);
 			if (o != null) {
+				LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
+						"Setting member config to manager.config=" + o);
 				h.put(CONFIG_PARAM, o);
 			}
 		}
 		if (h.isEmpty()) {
 			o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIGURL_PARAM);
 			if (o != null) {
+				LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
+						"Setting member configURL to member.configURL=" + o);
 				h.put(CONFIGURL_PARAM, o);
 			} else {
 				o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIG_PARAM);
 				if (o != null) {
+					LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
+							"Setting member config to member.config=" + o);
 					h.put(CONFIG_PARAM, o);
 				}
 			}
@@ -134,8 +164,12 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 				config = getConfigFromArg(parameters);
 
 			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
+			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+					"Creating Hazelcast" + ((isServer) ? "Manager" : "Member") + "Container");
 			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,
 					isServer ? DEFAULT_SERVER_ID : UUID.randomUUID().toString());
+			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+					"ID for new Hazelcast container=" + id);
 			checkOSGIIntents(description, config, parameters);
 			// set config classloader
 			config.setClassLoader(this.getClass().getClassLoader());

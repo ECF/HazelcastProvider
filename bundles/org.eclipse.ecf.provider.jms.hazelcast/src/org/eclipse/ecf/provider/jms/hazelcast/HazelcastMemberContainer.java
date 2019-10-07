@@ -20,6 +20,8 @@ import org.eclipse.ecf.provider.comm.ConnectionCreateException;
 import org.eclipse.ecf.provider.comm.IConnection;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.internal.jms.hazelcast.Activator;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.DebugOptions;
+import org.eclipse.ecf.provider.internal.jms.hazelcast.LogUtility;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSClient;
 import org.eclipse.ecf.provider.jms.container.JMSContainerConfig;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
@@ -71,10 +73,15 @@ public class HazelcastMemberContainer extends AbstractJMSClient implements IRSAC
 					throw new ConnectionCreateException("Could not adjust hazelcastConfig with targetID=" + targetID,
 							e);
 				}
+				LogUtility.trace("start", DebugOptions.MEMBER, this.getClass(),
+						"Creating Hazelcast instance with config=" + this.hazelcastConfig);
 				hazelcastInstance = hazelcastOSGiService.newHazelcastInstance(this.hazelcastConfig);
 			} else {
+				LogUtility.trace("start", DebugOptions.MEMBER, this.getClass(),
+						"Creating Hazelcast instance with default config");
 				hazelcastInstance = hazelcastOSGiService.newHazelcastInstance();
 			}
+			LogUtility.trace("start", DebugOptions.MEMBER, this.getClass(), "Hazelcast instance created");
 			return new HazelcastMemberChannel(getReceiver(), hazelcastInstance);
 		} else
 			throw new ConnectionCreateException("Cannot connect because already have hazelcast instance");
@@ -82,8 +89,12 @@ public class HazelcastMemberContainer extends AbstractJMSClient implements IRSAC
 
 	private void disconnectHazelcast() {
 		if (this.hazelcastInstance != null) {
+			LogUtility.trace("disconnectHazelcast", DebugOptions.MEMBER, this.getClass(),
+					"Shutting down Hazelcast instance");
 			this.hazelcastInstance.shutdown();
 			this.hazelcastInstance = null;
+			LogUtility.trace("disconnectHazelcast", DebugOptions.MEMBER, this.getClass(),
+					"Hazelcast instance shutdown");
 		}
 	}
 
