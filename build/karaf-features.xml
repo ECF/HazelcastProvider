@@ -1,17 +1,17 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
-	name="ecf-remoteservices-hazelcast-1.5.6">
+	name="ecf-remoteservices-hazelcast-1.5.7">
 	
     <repository>http://download.eclipse.org/rt/ecf/RELEASE/site.p2/karaf-features.xml</repository>
 
-	<feature name="ecf-rs-hazelcast-deps" version="1.5.6"
+	<feature name="ecf-rs-hazelcast-deps" version="1.5.7"
 		description="ECF Hazelcast Dependencies Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-rsa</feature>
 		<feature>ecf-rs-console</feature>
 		<feature>transaction-api</feature>
-		<bundle start-level="20">mvn:com.hazelcast/hazelcast/3.12.2</bundle>
+		<bundle>mvn:com.hazelcast/hazelcast/3.12.2</bundle>
 	</feature>
 	
-	<feature name="ecf-rs-distribution-hazelcast" version="1.5.6"
+	<feature name="ecf-rs-distribution-hazelcast" version="1.5.7"
 		description="ECF Hazelcast Distribution Provider Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-hazelcast-deps</feature>
 		<feature>ecf-rs-distribution-generic</feature>
@@ -19,18 +19,18 @@
 		</bundle>
 		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201806152009.jar
 		</bundle>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.3.4.201910022114.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.provider.jms.hazelcast_1.3.5.201910062145.jar
 		</bundle>
 	</feature>
 
-	<feature name="ecf-rs-discovery-hazelcast" version="1.5.6"
+	<feature name="ecf-rs-discovery-hazelcast" version="1.5.7"
 		description="ECF Hazelcast Discovery Provider Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-hazelcast-deps</feature>
-		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.4.201910022114.jar
+		<bundle>https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/plugins/org.eclipse.ecf.discovery.provider.hazelcast_1.0.4.201910062145.jar
 		</bundle>
 	</feature>
 
-	<feature name="ecf-rs-hazelcast" version="1.5.6"
+	<feature name="ecf-rs-hazelcast" version="1.5.7"
 		description="ECF Hazelcast Distribution and Discovery Provider Support. See https://github.com/ECF/HazelcastProvider">
 		<feature>ecf-rs-discovery-hazelcast</feature>
 		<feature>ecf-rs-distribution-hazelcast</feature>
