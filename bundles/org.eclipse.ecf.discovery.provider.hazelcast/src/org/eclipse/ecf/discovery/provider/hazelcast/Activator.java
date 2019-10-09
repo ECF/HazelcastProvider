@@ -50,12 +50,16 @@ public class Activator implements BundleActivator {
 			.valueOf(System.getProperty(HazelcastDiscoveryContainerInstantiator.NAME + ".enabled", "true"))
 			.booleanValue();
 
-	private static final String HAZELCAST_CONFIG = System
-			.getProperty(HazelcastDiscoveryContainerInstantiator.NAME + ".configURL");
+	private static final String HAZELCAST_CONFIG_PROP = HazelcastDiscoveryContainerInstantiator.NAME + ".configURL";
+	private static final String HAZELCAST_CONFIG = System.getProperty(HAZELCAST_CONFIG_PROP);
+	private static final String HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME_PROP = HazelcastDiscoveryContainerInstantiator.NAME
+			+ ".configBundleSymbolicName";
 	private static final String HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME = System
-			.getProperty(HazelcastDiscoveryContainerInstantiator.NAME + ".configBundleSymbolicName");
+			.getProperty(HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME_PROP);
+	private static final String HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH_PROP = HazelcastDiscoveryContainerInstantiator.NAME
+			+ ".configBundleEntryPath";
 	private static final String HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH = System
-			.getProperty(HazelcastDiscoveryContainerInstantiator.NAME + ".configBundleEntryPath", "/hazelcast.xml");
+			.getProperty(HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH_PROP, "/hazelcast.xml");
 
 	private static Activator plugin;
 
@@ -119,8 +123,22 @@ public class Activator implements BundleActivator {
 	}
 
 	private URL getURLWithHazelcastConfig() throws Exception {
-		return (HAZELCAST_CONFIG != null) ? new URL(HAZELCAST_CONFIG)
-				: findBundleForHazelcastConfig().getEntry(HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH);
+		if (HAZELCAST_CONFIG != null) {
+			LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"System property " + HAZELCAST_CONFIG_PROP + "=" + HAZELCAST_CONFIG);
+			return new URL(HAZELCAST_CONFIG);
+		} else {
+			Bundle b = findBundleForHazelcastConfig();
+			if (b != null) {
+				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+						"Property " + HAZELCAST_CONFIG_PROP + "=" + b.getSymbolicName());
+				URL entryURL = b.getEntry(HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH);
+				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+						"Property " + HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH_PROP + "=" + entryURL);
+				return entryURL;
+			}
+		}
+		return null;
 	}
 
 	public void start(BundleContext ctxt) throws Exception {
@@ -128,9 +146,15 @@ public class Activator implements BundleActivator {
 		context = ctxt;
 
 		if (HAZELCAST_ENABLED) {
+			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(), "Hazelcast Discovery enabled");
 			BundleStarter.startDependents(ctxt, DEPENDENT_BUNDLES, Bundle.RESOLVED | Bundle.STARTING);
 			// Get URL given system props (constants above)
 			URL hazelcastConfigFile = getURLWithHazelcastConfig();
+			if (hazelcastConfigFile == null) {
+				hazelcastConfigFile = context.getBundle().getEntry("/hazelcast.xml");
+			}
+			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(),
+					"Hazelcast discovery configURL=" + hazelcastConfigFile);
 			// Register Namespace and ContainerTypeDescription first
 			IDFactory.getDefault().addNamespace(new HazelcastNamespace());
 			context.registerService(ContainerTypeDescription.class, ctd, null);
@@ -145,6 +169,8 @@ public class Activator implements BundleActivator {
 					try {
 						hazelcastInputStream.close();
 					} catch (Exception e) {
+						LogUtility.logError("start", DebugOptions.CONFIG, this.getClass(),
+								"Exception closing hazelcast input stream");
 					}
 				}
 			}
@@ -169,7 +195,10 @@ public class Activator implements BundleActivator {
 							ungetHazelcastContainer();
 						}
 					}, props);
+		} else {
+			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(), "Hazelcast Discovery DISABLED");
 		}
+
 	}
 
 	synchronized void ungetHazelcastContainer() {

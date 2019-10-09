@@ -32,7 +32,7 @@ import com.hazelcast.osgi.HazelcastOSGiService;
 public class Activator implements BundleActivator {
 
 	public static final String ID = "org.eclipse.ecf.provider.jms.hazelcast";
-	private static final String[] DEPENDENT_BUNDLES = new String[] { "org.eclipse.ecf.provider.jms", "com.hazelcast" };
+	private static final String[] DEPENDENT_BUNDLES = new String[] { "com.hazelcast", "org.eclipse.ecf.provider.jms" };
 
 	public static final String HAZELCAST_PREFIX = "ecf.jms.hazelcast";
 	public static final String HAZELCAST_MANAGER_NAME = HAZELCAST_PREFIX + ".manager";

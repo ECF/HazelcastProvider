@@ -58,8 +58,8 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	// ReplicatedMap of serviceLocation (id) -> HazelcastServiceInfo
 	private ReplicatedMap<String, HazelcastServiceInfo> hazelcastReplicatedMap;
 	private Map<String, HazelcastServiceInfo> services;
-	
-	// Entry listener for replicated map.  Set on to replicated map in connect
+
+	// Entry listener for replicated map. Set on to replicated map in connect
 	private EntryListener<String, HazelcastServiceInfo> entryListener = new EntryListener<String, HazelcastServiceInfo>() {
 
 		@Override
@@ -70,7 +70,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 			synchronized (services) {
 				String key = si.getKey();
 				if (!services.containsKey(key)) {
-					trace("entryAdded","adding to services");
+					trace("entryAdded", "adding to services");
 					services.put(key, si);
 					fire = initialized;
 				}
@@ -110,7 +110,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		}
 	};
 
-	// Membership changes in group  Responds by adding or removing service infos
+	// Membership changes in group Responds by adding or removing service infos
 	// for all service infos provided by member
 	private MembershipListener membershipListener = new MembershipAdapter() {
 
@@ -149,7 +149,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	public HazelcastDiscoveryContainer(HazelcastDiscoveryContainerConfig config) {
 		super(HazelcastNamespace.NAME, config);
 		// Create locally synchronized map for multi-threaded local access
-		this.services = Collections.synchronizedMap(new HashMap<String,HazelcastServiceInfo>());
+		this.services = Collections.synchronizedMap(new HashMap<String, HazelcastServiceInfo>());
 	}
 
 	@Override
@@ -218,7 +218,6 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	public ID getConnectedID() {
 		return targetID;
 	}
-
 
 	@Override
 	public void disconnect() {
@@ -332,7 +331,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 
 	private void addServiceInfoForMember(String member) {
 		trace("addServiceInfoForMember", "member=" + member);
-		
+
 		Map<String, HazelcastServiceInfo> addedServices = new HashMap<String, HazelcastServiceInfo>();
 		boolean fire = false;
 		// No changes to services while happening
@@ -346,7 +345,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 					// If key not already in services
 					if (!services.containsKey(key)) {
 						// then add it
-						trace("addServiceInfoForMember","adding key="+key);
+						trace("addServiceInfoForMember", "adding key=" + key);
 						services.put(key, si);
 						// and add to addedServices to notify if we've already been initialized
 						addedServices.put(key, si);
