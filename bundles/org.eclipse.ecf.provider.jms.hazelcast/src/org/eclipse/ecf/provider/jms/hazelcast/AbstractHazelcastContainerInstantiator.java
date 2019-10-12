@@ -11,6 +11,7 @@
 package org.eclipse.ecf.provider.jms.hazelcast;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +32,11 @@ import org.eclipse.ecf.provider.internal.jms.hazelcast.LogUtility;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 import org.eclipse.ecf.remoteservice.provider.PeerRemoteServiceContainerInstantiator;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.config.InMemoryXmlConfig;
-import com.hazelcast.config.UrlXmlConfig;
 import com.hazelcast.config.XmlConfigBuilder;
 
 public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteServiceContainerInstantiator {
@@ -42,9 +44,8 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/defaultRemoteServicesTopic";
 
 	public static final String ID_PARAM = "id";
-	public static final String KEEPALIVE_PARAM = "keepAlive";
-	public static final String CONFIG_PARAM = "config";
 	public static final String CONFIGURL_PARAM = "configURL";
+	public static final String DEFAULT_CONFIG_BUNDLE_PATH = "/hazelcast.xml";
 
 	protected static final String[] hazelcastIntents = { "hazelcast" };
 
@@ -75,42 +76,19 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 		return (String[]) results.toArray(new String[results.size()]);
 	}
 
-	protected Config getConfigFromArg(Map<String, ?> parameters) throws Exception {
-		Object o = getParameterValue(parameters, CONFIG_PARAM, Object.class, null);
-		if (o instanceof Config) {
-			Config config = (Config) o;
-			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-					"Loading Hazelcast config from exising config=" + config);
-			return config;
-		} else if (o instanceof InputStream) {
-			InputStream ins = (InputStream) o;
-			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-					"Loading Hazelcast config from inputstream=" + ins);
-			return new XmlConfigBuilder((InputStream) o).build();
-		} else if (o instanceof URL) {
-			URL url = (URL) o;
-			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-					"Loading Hazelcast config from url=" + url);
-			return new UrlXmlConfig(url);
-		} else if (o instanceof String) {
-			String str = (String) o;
-			LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-					"Loading Hazelcast config from string=" + str);
-			return new InMemoryXmlConfig(str);
-		}
-		LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-				"Loading Hazelcast config default -Dhazelcast.config="
-						+ System.getProperty("hazelcast.config", "<default>"));
-		return new XmlConfigBuilder().build();
-	}
-
-	protected Config getURLConfigFromArg(Map<String, ?> parameters) throws Exception {
+	protected Config getURLConfigFromArg(Map<String, ?> parameters, BundleContext bundleContext) throws Exception {
 		Object o = getParameterValue(parameters, CONFIGURL_PARAM, Object.class, null);
 		if (o instanceof String) {
-			URL url = new URL((String) o);
+			String hazelcastConfigURL = (String) o;
 			LogUtility.trace("getURLConfigFromArg", DebugOptions.DEBUG, this.getClass(),
-					"Using configURL=" + url + " for loading Hazelcast config");
-			return new UrlXmlConfig(new URL((String) o));
+					"Using configURL=" + hazelcastConfigURL + " for loading Hazelcast config");
+			URL url = getURLFromConfigURL(hazelcastConfigURL, bundleContext, DEFAULT_CONFIG_BUNDLE_PATH, false);
+			LogUtility.trace("getURLConfigFromArg", DebugOptions.DEBUG, this.getClass(),
+					"Using configURL=" + url + " to load Hazelcast config");
+			Config config = createHazelcastConfig(url);
+			LogUtility.trace("getURLConfigFromArg", DebugOptions.DEBUG, this.getClass(),
+					"Loaded Hazelcast config=" + config);
+			return config;
 		}
 		return null;
 	}
@@ -130,13 +108,6 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 			LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
 					"Setting member configURL to manager.configURL=" + o);
 			h.put(CONFIGURL_PARAM, o);
-		} else {
-			o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + CONFIG_PARAM);
-			if (o != null) {
-				LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
-						"Setting member config to manager.config=" + o);
-				h.put(CONFIG_PARAM, o);
-			}
 		}
 		if (h.isEmpty()) {
 			o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIGURL_PARAM);
@@ -144,25 +115,111 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 				LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
 						"Setting member configURL to member.configURL=" + o);
 				h.put(CONFIGURL_PARAM, o);
-			} else {
-				o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIG_PARAM);
-				if (o != null) {
-					LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
-							"Setting member config to member.config=" + o);
-					h.put(CONFIG_PARAM, o);
-				}
 			}
 		}
 		return h;
 	}
 
+	private Bundle findBundleForHazelcastConfig(String bundleSymbolicName, BundleContext context)
+			throws BundleException {
+		if (bundleSymbolicName != null) {
+			Bundle candidate = null;
+			for (Bundle b : context.getBundles()) {
+				if (b.getSymbolicName().equals(bundleSymbolicName)) {
+					if (candidate == null || b.getVersion().compareTo(candidate.getVersion()) > 0) {
+						candidate = b;
+					}
+				}
+			}
+			if (candidate != null) {
+				return candidate;
+			} else {
+				throw new BundleException("Could not find a bundle with symbolic name=" + bundleSymbolicName);
+			}
+		} else {
+			// use this bundle (default)
+			return context.getBundle();
+		}
+	}
+
+	private URL getURLFromConfigURL(String hazelcastConfigURI, BundleContext bundleContext, String bundleConfigFilePath,
+			boolean useDefaultBundle) throws Exception {
+		String bundleSymbolicName = null;
+		String configPath = bundleConfigFilePath;
+		Bundle bundle = useDefaultBundle ? bundleContext.getBundle() : null;
+		if (hazelcastConfigURI != null) {
+			URI uri = new URI(hazelcastConfigURI);
+			if ("bundle".equalsIgnoreCase(uri.getScheme())) {
+				// Bundle URL given
+				String bundleAndPath = uri.getSchemeSpecificPart();
+				int pathLocation = bundleAndPath.indexOf("/");
+				if (pathLocation != -1) {
+					bundleSymbolicName = bundleAndPath.substring(0, pathLocation);
+					configPath = bundleAndPath.substring(pathLocation);
+				} else {
+					bundleSymbolicName = bundleAndPath;
+				}
+				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+						"Hazelcast config defined by bundle URI. bundleSymbolicName=" + bundleSymbolicName + ";path="
+								+ configPath);
+				bundle = findBundleForHazelcastConfig(bundleSymbolicName, bundleContext);
+				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+						"Found bundle=" + bundle + " for symbolic name=" + bundleSymbolicName);
+
+			} else {
+				URL url = uri.toURL();
+				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+						"Returning URL=" + url);
+				return url;
+			}
+		}
+		if (bundle != null) {
+			URL url = bundle.getEntry(configPath);
+			LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"Returning URL=" + url + " from bundle=" + bundle + ";configPath=" + configPath);
+			return url;
+		} else {
+			LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(), "Returning NULL");
+			return null;
+		}
+	}
+
+	private Config createHazelcastConfig(URL hazelcastConfigURL) throws Exception {
+		InputStream hazelcastInputStream = null;
+		try {
+			LogUtility.trace("getHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"Loading hazelcast config from URL=" + hazelcastConfigURL);
+			hazelcastInputStream = hazelcastConfigURL.openStream();
+			Config config = new XmlConfigBuilder(hazelcastInputStream).build();
+			LogUtility.trace("getHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"Loaded hazelcast config from URL=" + hazelcastConfigURL);
+			return config;
+		} finally {
+			if (hazelcastInputStream != null) {
+				try {
+					hazelcastInputStream.close();
+				} catch (Exception e) {
+					LogUtility.logError("start", DebugOptions.CONFIG, this.getClass(),
+							"Exception closing hazelcast input stream from url=" + hazelcastConfigURL);
+				}
+			}
+		}
+	}
+
 	public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)
 			throws ContainerCreateException {
 		try {
-			Config config = getURLConfigFromArg(parameters);
-			if (config == null)
-				config = getConfigFromArg(parameters);
-
+			Config config = getURLConfigFromArg(parameters, Activator.getContext());
+			// If the above returns null, we should be using the hazelcast-default.xml in HC
+			// bundle
+			if (config == null) {
+				LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+						"Loading Hazelcast config default -Dhazelcast.config="
+								+ System.getProperty("hazelcast.config", "<default>"));
+				config = new XmlConfigBuilder().build();
+			}
+			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+					"Using Hazelcast config=" + config);
 			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
 			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
 					"Creating Hazelcast" + ((isServer) ? "Manager" : "Member") + "Container");

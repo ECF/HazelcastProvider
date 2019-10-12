@@ -9,6 +9,7 @@
 package org.eclipse.ecf.discovery.provider.hazelcast;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.Hashtable;
 
@@ -52,14 +53,8 @@ public class Activator implements BundleActivator {
 
 	private static final String HAZELCAST_CONFIG_PROP = HazelcastDiscoveryContainerInstantiator.NAME + ".configURL";
 	private static final String HAZELCAST_CONFIG = System.getProperty(HAZELCAST_CONFIG_PROP);
-	private static final String HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME_PROP = HazelcastDiscoveryContainerInstantiator.NAME
-			+ ".configBundleSymbolicName";
-	private static final String HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME = System
-			.getProperty(HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME_PROP);
-	private static final String HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH_PROP = HazelcastDiscoveryContainerInstantiator.NAME
-			+ ".configBundleEntryPath";
-	private static final String HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH = System
-			.getProperty(HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH_PROP, "/hazelcast.xml");
+
+	private static final String HAZELCAST_CONFIG_DEFAULT_PATH = "/hc-discovery-config.xml";
 
 	private static Activator plugin;
 
@@ -100,11 +95,12 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	private Bundle findBundleForHazelcastConfig() throws BundleException {
-		if (HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME != null) {
+	private Bundle findBundleForHazelcastConfig(String bundleSymbolicName, BundleContext context)
+			throws BundleException {
+		if (bundleSymbolicName != null) {
 			Bundle candidate = null;
 			for (Bundle b : context.getBundles()) {
-				if (b.getSymbolicName().equals(HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME)) {
+				if (b.getSymbolicName().equals(bundleSymbolicName)) {
 					if (candidate == null || b.getVersion().compareTo(candidate.getVersion()) > 0) {
 						candidate = b;
 					}
@@ -113,8 +109,7 @@ public class Activator implements BundleActivator {
 			if (candidate != null) {
 				return candidate;
 			} else {
-				throw new BundleException(
-						"Could not find a bundle with symbolic name=" + HAZELCAST_CONFIG_BUNDLE_SYMBOLIC_NAME);
+				throw new BundleException("Could not find a bundle with symbolic name=" + bundleSymbolicName);
 			}
 		} else {
 			// use this bundle (default)
@@ -122,23 +117,68 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	private URL getURLWithHazelcastConfig() throws Exception {
-		if (HAZELCAST_CONFIG != null) {
-			LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
-					"System property " + HAZELCAST_CONFIG_PROP + "=" + HAZELCAST_CONFIG);
-			return new URL(HAZELCAST_CONFIG);
-		} else {
-			Bundle b = findBundleForHazelcastConfig();
-			if (b != null) {
+	private URL getURLFromConfigURL(String hazelcastConfigURI, BundleContext bundleContext, String bundleConfigFilePath,
+			boolean useDefaultBundle) throws Exception {
+		String bundleSymbolicName = null;
+		String configPath = bundleConfigFilePath;
+		Bundle bundle = useDefaultBundle ? bundleContext.getBundle() : null;
+		if (hazelcastConfigURI != null) {
+			URI uri = new URI(hazelcastConfigURI);
+			if ("bundle".equalsIgnoreCase(uri.getScheme())) {
+				// Bundle URL given
+				String bundleAndPath = uri.getSchemeSpecificPart();
+				int pathLocation = bundleAndPath.indexOf("/");
+				if (pathLocation != -1) {
+					bundleSymbolicName = bundleAndPath.substring(0, pathLocation);
+					configPath = bundleAndPath.substring(pathLocation);
+				} else {
+					bundleSymbolicName = bundleAndPath;
+				}
 				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
-						"Property " + HAZELCAST_CONFIG_PROP + "=" + b.getSymbolicName());
-				URL entryURL = b.getEntry(HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH);
+						"Hazelcast config defined by bundle URI. bundleSymbolicName=" + bundleSymbolicName + ";path="
+								+ configPath);
+				bundle = findBundleForHazelcastConfig(bundleSymbolicName, bundleContext);
 				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
-						"Property " + HAZELCAST_CONFIG_BUNDLE_ENTRY_PATH_PROP + "=" + entryURL);
-				return entryURL;
+						"Found bundle=" + bundle + " for symbolic name=" + bundleSymbolicName);
+
+			} else {
+				URL url = uri.toURL();
+				LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+						"Returning URL=" + url);
+				return url;
 			}
 		}
-		return null;
+		if (bundle != null) {
+			URL url = bundle.getEntry(configPath);
+			LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"Returning URL=" + url + " from bundle=" + bundle + ";configPath=" + configPath);
+			return url;
+		} else {
+			LogUtility.trace("getURLWithHazelcastConfig", DebugOptions.CONFIG, this.getClass(), "Returning NULL");
+			return null;
+		}
+	}
+
+	private Config createHazelcastConfig(URL hazelcastConfigURL) throws Exception {
+		InputStream hazelcastInputStream = null;
+		try {
+			LogUtility.trace("getHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"Loading hazelcast config from URL=" + hazelcastConfigURL);
+			hazelcastInputStream = hazelcastConfigURL.openStream();
+			Config config = new XmlConfigBuilder(hazelcastInputStream).build();
+			LogUtility.trace("getHazelcastConfig", DebugOptions.CONFIG, this.getClass(),
+					"Loaded hazelcast config from URL=" + hazelcastConfigURL);
+			return config;
+		} finally {
+			if (hazelcastInputStream != null) {
+				try {
+					hazelcastInputStream.close();
+				} catch (Exception e) {
+					LogUtility.logError("start", DebugOptions.CONFIG, this.getClass(),
+							"Exception closing hazelcast input stream from url=" + hazelcastConfigURL);
+				}
+			}
+		}
 	}
 
 	public void start(BundleContext ctxt) throws Exception {
@@ -148,34 +188,35 @@ public class Activator implements BundleActivator {
 		if (HAZELCAST_ENABLED) {
 			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(), "Hazelcast Discovery enabled");
 			BundleStarter.startDependents(ctxt, DEPENDENT_BUNDLES, Bundle.RESOLVED | Bundle.STARTING);
-			// Get URL given system props (constants above)
-			URL hazelcastConfigFile = getURLWithHazelcastConfig();
-			if (hazelcastConfigFile == null) {
-				hazelcastConfigFile = context.getBundle().getEntry("/hazelcast.xml");
-			}
-			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(),
-					"Hazelcast discovery configURL=" + hazelcastConfigFile);
 			// Register Namespace and ContainerTypeDescription first
 			IDFactory.getDefault().addNamespace(new HazelcastNamespace());
 			context.registerService(ContainerTypeDescription.class, ctd, null);
-
-			Config hazelcastConfig = null;
-			InputStream hazelcastInputStream = null;
-			try {
-				hazelcastInputStream = hazelcastConfigFile.openStream();
-				hazelcastConfig = new XmlConfigBuilder(hazelcastInputStream).build();
-			} finally {
-				if (hazelcastInputStream != null) {
-					try {
-						hazelcastInputStream.close();
-					} catch (Exception e) {
-						LogUtility.logError("start", DebugOptions.CONFIG, this.getClass(),
-								"Exception closing hazelcast input stream");
-					}
-				}
+			// Get URL given system props (constants above)
+			if (HAZELCAST_CONFIG != null) {
+				LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(),
+						"Hazelcast discovery config set via system property= " + HAZELCAST_CONFIG_PROP + ";value="
+								+ HAZELCAST_CONFIG);
 			}
+			Bundle b = context.getBundle();
+			URL hazelcastConfigURL = getURLFromConfigURL(HAZELCAST_CONFIG, context, HAZELCAST_CONFIG_DEFAULT_PATH,
+					true);
+			if (hazelcastConfigURL == null) {
+				throw new BundleException("Could not get hazelcastConfig URL with HAZELCAST_CONFIG=" + HAZELCAST_CONFIG
+						+ ";bundle=" + b + ";defaultPath=" + HAZELCAST_CONFIG_DEFAULT_PATH);
+			}
+			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(),
+					"Hazelcast discovery configURL=" + hazelcastConfigURL);
+			Config hazelcastConfig = createHazelcastConfig(hazelcastConfigURL);
+			if (hazelcastConfig == null) {
+				throw new BundleException(
+						"Could not retrieve or create Hazelcast config for configURL=" + hazelcastConfigURL);
+			}
+			LogUtility.trace("start", DebugOptions.CONFIG, this.getClass(),
+					"Using Hazelcast config=" + hazelcastConfig + " for discovery");
 
+			// Have config so we set classloader
 			hazelcastConfig.setClassLoader(this.getClass().getClassLoader());
+			// Create HazelcastDiscoveryContainerConfig
 			final HazelcastDiscoveryContainerConfig config = new HazelcastDiscoveryContainerConfig(hazelcastConfig);
 
 			final Hashtable<String, Object> props = new Hashtable<String, Object>();

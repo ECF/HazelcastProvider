@@ -82,7 +82,7 @@ public class Activator implements BundleActivator {
 
 	private ServiceTracker<HazelcastOSGiService, HazelcastOSGiService> hazelcastTracker;
 
-	private static BundleContext getContext() {
+	public static BundleContext getContext() {
 		return context;
 	}
 
