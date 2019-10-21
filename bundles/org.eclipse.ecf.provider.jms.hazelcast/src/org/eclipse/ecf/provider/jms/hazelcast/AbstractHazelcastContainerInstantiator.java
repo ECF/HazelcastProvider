@@ -36,16 +36,20 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.config.XmlClientConfigBuilder;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
 
 public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteServiceContainerInstantiator {
 
-	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/defaultRemoteServicesTopic";
+	public static final String DEFAULT_SERVER_ID = "hazelcast://localhost/defaultRemoteServicesGroup";
 
 	public static final String ID_PARAM = "id";
 	public static final String CONFIGURL_PARAM = "configURL";
+	public static final String MEMBER_CONFIGURL_PARAM = "memberConfigURL";
 	public static final String DEFAULT_CONFIG_BUNDLE_PATH = "/hazelcast.xml";
+	public static final String DEFAULT_CLIENT_CONFIG_BUNDLE_PATH = "/hazelcast-client.xml";
 
 	protected static final String[] hazelcastIntents = { "hazelcast" };
 
@@ -93,6 +97,24 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 		return null;
 	}
 
+	protected ClientConfig getURLClientConfigFromArg(Map<String, ?> parameters, BundleContext bundleContext)
+			throws Exception {
+		Object o = getParameterValue(parameters, MEMBER_CONFIGURL_PARAM, Object.class, null);
+		if (o instanceof String) {
+			String hazelcastConfigURL = (String) o;
+			LogUtility.trace("getURLClientConfigFromArg", DebugOptions.DEBUG, this.getClass(),
+					"Using configURL=" + hazelcastConfigURL + " for loading Hazelcast config");
+			URL url = getURLFromConfigURL(hazelcastConfigURL, bundleContext, DEFAULT_CLIENT_CONFIG_BUNDLE_PATH, false);
+			LogUtility.trace("getURLClientConfigFromArg", DebugOptions.DEBUG, this.getClass(),
+					"Using configURL=" + url + " to load Hazelcast config");
+			ClientConfig config = createHazelcastClientConfig(url);
+			LogUtility.trace("getURLClientConfigFromArg", DebugOptions.DEBUG, this.getClass(),
+					"Loaded Hazelcast client config=" + config);
+			return config;
+		}
+		return null;
+	}
+
 	protected void checkOSGIIntents(ContainerTypeDescription description, Config config, Map<String, ?> properties)
 			throws ContainerIntentException {
 		checkAsyncIntent(description, properties);
@@ -102,19 +124,19 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 	@Override
 	public Dictionary getPropertiesForImportedConfigs(ContainerTypeDescription description, String[] importedConfigs,
 			Dictionary exportedProperties) {
-		Object o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + CONFIGURL_PARAM);
+		Object o = exportedProperties.get(Activator.HAZELCAST_MANAGER_NAME + "." + MEMBER_CONFIGURL_PARAM);
 		Hashtable h = new Hashtable();
 		if (o != null) {
 			LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
 					"Setting member configURL to manager.configURL=" + o);
-			h.put(CONFIGURL_PARAM, o);
+			h.put(MEMBER_CONFIGURL_PARAM, o);
 		}
 		if (h.isEmpty()) {
-			o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + CONFIGURL_PARAM);
+			o = exportedProperties.get(Activator.HAZELCAST_MEMBER_NAME + "." + MEMBER_CONFIGURL_PARAM);
 			if (o != null) {
 				LogUtility.trace("getPropertiesForImportedConfig", DebugOptions.CONFIG, this.getClass(),
 						"Setting member configURL to member.configURL=" + o);
-				h.put(CONFIGURL_PARAM, o);
+				h.put(MEMBER_CONFIGURL_PARAM, o);
 			}
 		}
 		return h;
@@ -206,38 +228,89 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 		}
 	}
 
-	public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)
-			throws ContainerCreateException {
+	private ClientConfig createHazelcastClientConfig(URL hazelcastConfigURL) throws Exception {
+		InputStream hazelcastInputStream = null;
 		try {
-			Config config = getURLConfigFromArg(parameters, Activator.getContext());
-			// If the above returns null, we should be using the hazelcast-default.xml in HC
-			// bundle
-			if (config == null) {
-				LogUtility.trace("getConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-						"Loading Hazelcast config default -Dhazelcast.config="
-								+ System.getProperty("hazelcast.config", "<default>"));
-				config = new XmlConfigBuilder().build();
+			LogUtility.trace("createHazelcastClientConfig", DebugOptions.CONFIG, this.getClass(),
+					"Loading hazelcast client config from URL=" + hazelcastConfigURL);
+			hazelcastInputStream = hazelcastConfigURL.openStream();
+			ClientConfig config = new XmlClientConfigBuilder(hazelcastInputStream).build();
+			LogUtility.trace("createHazelcastClientConfig", DebugOptions.CONFIG, this.getClass(),
+					"Loaded hazelcast client config from URL=" + hazelcastConfigURL);
+			return config;
+		} finally {
+			if (hazelcastInputStream != null) {
+				try {
+					hazelcastInputStream.close();
+				} catch (Exception e) {
+					LogUtility.logError("start", DebugOptions.CONFIG, this.getClass(),
+							"Exception closing input stream from url=" + hazelcastConfigURL);
+				}
 			}
-			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
-					"Using Hazelcast config=" + config);
-			boolean isServer = description.getName().equals(Activator.HAZELCAST_MANAGER_NAME);
-			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
-					"Creating Hazelcast" + ((isServer) ? "Manager" : "Member") + "Container");
-			JMSID id = getJMSIDFromParameter(parameters, ID_PARAM,
-					isServer ? DEFAULT_SERVER_ID : UUID.randomUUID().toString());
-			LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
-					"ID for new Hazelcast container=" + id);
-			checkOSGIIntents(description, config, parameters);
-			// set config classloader
-			config.setClassLoader(this.getClass().getClassLoader());
-			return createHazelcastContainer(id, parameters, config);
-		} catch (Exception e) {
-			if (e instanceof ContainerIntentException)
-				throw (ContainerIntentException) e;
-			return throwCreateException("Could not create hazelcast container with name " + description.getName(), e);
 		}
 	}
 
-	protected abstract IContainer createHazelcastContainer(JMSID id, Map<String, ?> parameters, Config config)
-			throws Exception;
+	public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)
+			throws ContainerCreateException {
+		String descriptionName = description.getName();
+		JMSID id = null;
+		try {
+			if (descriptionName.equals(Activator.HAZELCAST_MANAGER_NAME)) {
+				id = getJMSIDFromParameter(parameters, ID_PARAM, DEFAULT_SERVER_ID);
+				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+						"ID for new Hazelcast Manager container=" + id);
+				Config config = getURLConfigFromArg(parameters, Activator.getContext());
+				// If the above returns null, we should be using the hazelcast-default.xml in HC
+				// bundle
+				if (config == null) {
+					LogUtility.trace("getURLConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+							"Loading Hazelcast config default -Dhazelcast.config="
+									+ System.getProperty("hazelcast.config", "com.hazelcast/hazelcast-default.xml"));
+					config = new XmlConfigBuilder().build();
+				}
+				config.setClassLoader(this.getClass().getClassLoader());
+				checkOSGIIntents(description, config, parameters);
+				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+						"Using Hazelcast config=" + config);
+				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+						"Creating Hazelcast Manager Container");
+				return createHazelcastManagerContainer(id, parameters, config);
+
+			} else if (descriptionName.equals(Activator.HAZELCAST_MEMBER_NAME)) {
+				id = getJMSIDFromParameter(parameters, ID_PARAM, UUID.randomUUID().toString());
+				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+						"ID for new Hazelcast member container=" + id);
+				ClientConfig clientConfig = getURLClientConfigFromArg(parameters, Activator.getContext());
+				// If the above returns null, we should be using the hazelcast-default.xml in HC
+				// bundle
+				if (clientConfig == null) {
+					LogUtility.trace("getURLClientConfigFromArg", DebugOptions.CONFIG, this.getClass(),
+							"Loading Hazelcast config default -Dhazelcastclient.config=" + System
+									.getProperty("hazelcastclient.config", "com.hazelcast:/hazelcast-client-default.xml"));
+					clientConfig = new XmlClientConfigBuilder().build();
+				}
+				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+						"Using Hazelcast client config=" + clientConfig);
+				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
+						"Creating Hazelcast Member Container");
+				return createHazelcastMemberContainer(id, parameters, clientConfig);
+			}
+			throw new ContainerCreateException("Cannot create container with type=" + descriptionName);
+		} catch (Exception e) {
+			if (e instanceof ContainerIntentException)
+				throw (ContainerIntentException) e;
+			return throwCreateException("Could not create hazelcast container with name " + descriptionName, e);
+		}
+	}
+
+	protected IContainer createHazelcastManagerContainer(JMSID serverID, @SuppressWarnings("rawtypes") Map props,
+			Config config) throws Exception {
+		throw new Exception("error");
+	}
+
+	protected IContainer createHazelcastMemberContainer(JMSID id, Map<String, ?> parameters, ClientConfig config)
+			throws Exception {
+		throw new Exception("error");
+	}
+
 }

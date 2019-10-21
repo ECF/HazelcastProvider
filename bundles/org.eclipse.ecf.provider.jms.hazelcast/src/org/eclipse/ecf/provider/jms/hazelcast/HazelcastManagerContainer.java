@@ -39,10 +39,9 @@ public class HazelcastManagerContainer extends AbstractJMSServer implements IRSA
 	public static class Instantiator extends AbstractHazelcastContainerInstantiator {
 
 		@Override
-		protected IContainer createHazelcastContainer(JMSID serverID, @SuppressWarnings("rawtypes") Map props,
+		protected IContainer createHazelcastManagerContainer(JMSID serverID, @SuppressWarnings("rawtypes") Map props,
 				Config config) throws Exception {
-			HazelcastManagerContainer sc = new HazelcastManagerContainer(new JMSContainerConfig(serverID, 0, props),
-					config);
+			HazelcastManagerContainer sc = new HazelcastManagerContainer(serverID, props, config);
 			sc.start();
 			return sc;
 		}
@@ -51,9 +50,10 @@ public class HazelcastManagerContainer extends AbstractJMSServer implements IRSA
 	private final Config hazelcastConfig;
 	private HazelcastInstance hazelcastInstance;
 
-	protected HazelcastManagerContainer(JMSContainerConfig config, Config hazelcastConfig) {
-		super(config);
-		this.hazelcastConfig = hazelcastConfig;
+	public HazelcastManagerContainer(JMSID serverID, @SuppressWarnings("rawtypes") Map props, Config config)
+			throws ECFException {
+		super(new JMSContainerConfig(serverID, 0, props));
+		this.hazelcastConfig = config;
 	}
 
 	@Override

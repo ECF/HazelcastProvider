@@ -37,7 +37,8 @@ public class Activator implements BundleActivator {
 	public static final String HAZELCAST_PREFIX = "ecf.jms.hazelcast";
 	public static final String HAZELCAST_MANAGER_NAME = HAZELCAST_PREFIX + ".manager";
 	public static final String HAZELCAST_MEMBER_NAME = HAZELCAST_PREFIX + ".member";
-
+	public static final String HAZELCAST_CLIENT_NAME = HAZELCAST_PREFIX + ".client";
+	
 	private static Activator instance;
 	private static BundleContext context;
 
