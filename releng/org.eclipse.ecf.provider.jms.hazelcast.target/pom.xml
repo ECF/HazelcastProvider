@@ -27,16 +27,6 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>ecf-neon.target</file>
-                  <type>target</type>
-                  <classifier>ecf-neon</classifier>
-                </artifact>
-                <artifact>
-                  <file>ecf-oxygen.target</file>
-                  <type>target</type>
-                  <classifier>ecf-oxygen</classifier>
-                </artifact>
-                <artifact>
                   <file>ecf-photon.target</file>
                   <type>target</type>
                   <classifier>ecf-photon</classifier>
