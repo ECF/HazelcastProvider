@@ -367,7 +367,11 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 				return (member == null) ? true : member.equals(si.getMemberId());
 			}).collect(Collectors.toList());
 			for (HazelcastServiceInfo si : removedServices) {
-				services.remove(si.getKey());
+				String key = si.getKey();
+				services.remove(key);
+				// Also remove from the replicated map so that it's gone
+				// for other members
+				this.hazelcastReplicatedMap.remove(key);
 			}
 		}
 		// Now notify about those that actually are removed

@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="Hazelcast Provider Neon Target" sequenceNumber="38">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target name="Hazelcast Provider Photon Target" sequenceNumber="38">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
 <repository location="http://download.eclipse.org/cbi/updates/license/1.0.1.v20140414-1359"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-	<unit id="org.eclipse.sdk.feature.group" version="4.7.3.v20180330-0919"/>
-	<repository location="http://download.eclipse.org/releases/oxygen"/>
+	<unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
+	<repository location="http://download.eclipse.org/releases/photon"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="javax.jms" version="1.1.0.v201205091237"/>
@@ -14,20 +16,15 @@
 <repository location="http://download.eclipse.org/tools/orbit/R-builds/R20170516192513/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.paho.client.eclipse.view" version="1.1.1"/>
-<unit id="org.eclipse.paho.client.mqttv3" version="1.1.1"/>
-<repository location="http://download.eclipse.org/paho/releases/1.1.1/Java"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ecf.provider.jms.feature.feature.group" version="2.9.0.201806152009"/>
 <repository location="https://raw.githubusercontent.com/ECF/JMS/master/build"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.feature.group" version="1.0.100.v20180502-2137"/>
-<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.source.feature.group" version="1.0.100.v20180502-2137"/>
-<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.14.0.v20180518-0149"/>
-<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="3.14.0.v20180518-0149"/>
-<repository location="http://download.eclipse.org/rt/ecf/3.14.0/site.p2"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.source.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="0.0.0"/>
+<repository location="http://download.eclipse.org/rt/ecf/3.14.5/site.p2"/>
 </location>
 <location path="${project_loc:org.eclipse.ecf.provider.jms.hazelcast.target}/bundles" type="Directory"/>
 </locations>
