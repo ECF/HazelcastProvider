@@ -264,8 +264,8 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 				// bundle
 				if (config == null) {
 					LogUtility.trace("getURLConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-							"Loading Hazelcast config default -Dhazelcast.config="
-									+ System.getProperty("hazelcast.config", "com.hazelcast/hazelcast-default.xml"));
+							"Loading Hazelcast config default -Dhazelcast.client.config="
+									+ System.getProperty("hazelcast.client.config", "com.hazelcast/hazelcast-default.xml"));
 					config = new XmlConfigBuilder().build();
 				}
 				config.setClassLoader(this.getClass().getClassLoader());
@@ -285,8 +285,8 @@ public abstract class AbstractHazelcastContainerInstantiator extends PeerRemoteS
 				// bundle
 				if (clientConfig == null) {
 					LogUtility.trace("getURLClientConfigFromArg", DebugOptions.CONFIG, this.getClass(),
-							"Loading Hazelcast config default -Dhazelcastclient.config=" + System
-									.getProperty("hazelcastclient.config", "com.hazelcast:/hazelcast-client-default.xml"));
+							"Loading Hazelcast config default -Dhazelcast.client.config=" + System
+									.getProperty("hazelcast.client.config", "com.hazelcast:/hazelcast-client-default.xml"));
 					clientConfig = new XmlClientConfigBuilder().build();
 				}
 				LogUtility.trace("createInstance", DebugOptions.CONFIG, this.getClass(),
