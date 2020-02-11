@@ -19,7 +19,8 @@ import javax.jms.JMSException;
 
 import org.eclipse.ecf.core.util.Trace;
 
-import com.hazelcast.core.ITopic;
+import com.hazelcast.topic.ITopic;
+
 
 public class HazelcastMessage {
 

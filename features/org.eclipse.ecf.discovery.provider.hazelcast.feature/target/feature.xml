@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.ecf.discovery.provider.hazelcast.feature"
       label="ECF Hazelcast Discovery Feature"
-      version="1.5.4.v20191002-0415"
+      version="1.7.0.v20200211-0506"
       provider-name="Eclipse.org - ECF">
 
    <description url="http://www.example.com/description">
@@ -20,15 +20,15 @@
    <plugin
          id="org.eclipse.ecf.discovery.provider.hazelcast"
          download-size="31"
-         install-size="77"
-         version="1.0.4.v20191002-0415"
+         install-size="74"
+         version="1.2.0.v20200211-0506"
          unpack="false"/>
 
    <plugin
          id="com.hazelcast"
-         download-size="11545"
-         install-size="25407"
-         version="3.12.2"
+         download-size="10993"
+         install-size="24478"
+         version="4.0.0"
          unpack="false"/>
 
 </feature>

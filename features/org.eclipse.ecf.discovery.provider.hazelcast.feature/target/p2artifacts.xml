@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?artifactRepository version='1.1.0'?>
 <artifacts size='1'>
-  <artifact classifier='org.eclipse.update.feature' id='org.eclipse.ecf.discovery.provider.hazelcast.feature' version='1.5.4.v20191002-0415'>
+  <artifact classifier='org.eclipse.update.feature' id='org.eclipse.ecf.discovery.provider.hazelcast.feature' version='1.7.0.v20200211-0506'>
     <properties size='6'>
-      <property name='artifact.size' value='823'/>
-      <property name='download.size' value='823'/>
+      <property name='artifact.size' value='825'/>
+      <property name='download.size' value='825'/>
       <property name='maven-groupId' value='org.eclipse.ecf.provider.jms.hazelcast'/>
       <property name='maven-artifactId' value='org.eclipse.ecf.discovery.provider.hazelcast.feature'/>
-      <property name='maven-version' value='1.5.4-SNAPSHOT'/>
+      <property name='maven-version' value='1.7.0-SNAPSHOT'/>
       <property name='download.contentType' value='application/zip'/>
     </properties>
   </artifact>

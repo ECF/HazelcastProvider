@@ -34,17 +34,17 @@ import org.eclipse.ecf.discovery.provider.hazelcast.LogUtility;
 import org.eclipse.ecf.discovery.provider.hazelcast.identity.HazelcastNamespace;
 import org.eclipse.ecf.discovery.provider.hazelcast.identity.HazelcastServiceID;
 
+import com.hazelcast.cluster.MembershipAdapter;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.EntryListenerConfig;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MapEvent;
-import com.hazelcast.core.MembershipAdapter;
-import com.hazelcast.core.MembershipEvent;
-import com.hazelcast.core.MembershipListener;
-import com.hazelcast.core.ReplicatedMap;
+import com.hazelcast.map.MapEvent;
 import com.hazelcast.osgi.HazelcastOSGiService;
+import com.hazelcast.replicatedmap.ReplicatedMap;
 
 public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapter {
 
@@ -108,6 +108,12 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 			trace("mapEvicted", "name=" + event.getName());
 			removeAllServiceInfos();
 		}
+
+		@Override
+		public void entryExpired(EntryEvent<String, HazelcastServiceInfo> arg0) {
+			// TODO Auto-generated method stub
+			
+		}
 	};
 
 	// Membership changes in group Responds by adding or removing service infos
@@ -118,14 +124,14 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 		public void memberAdded(MembershipEvent membershipEvent) {
 			trace("memberAdded", "memberId=" + membershipEvent.getMember().getUuid());
 			if (!membershipEvent.getMember().getUuid().equals(getMemberId())) {
-				addServiceInfoForMember(membershipEvent.getMember().getUuid());
+				addServiceInfoForMember(membershipEvent.getMember().getUuid().toString());
 			}
 		};
 
 		@Override
 		public void memberRemoved(MembershipEvent membershipEvent) {
 			trace("memberRemoved", "memberId=" + membershipEvent.getMember().getUuid());
-			removeServiceInfosForMember(membershipEvent.getMember().getUuid());
+			removeServiceInfosForMember(membershipEvent.getMember().getUuid().toString());
 		}
 	};
 
@@ -292,7 +298,7 @@ public class HazelcastDiscoveryContainer extends AbstractDiscoveryContainerAdapt
 	}
 
 	private String getMemberId() {
-		return hazelcastInstance.getLocalEndpoint().getUuid();
+		return hazelcastInstance.getLocalEndpoint().getUuid().toString();
 	}
 
 	private void fireServiceInfoUndiscovered(String siKey) {

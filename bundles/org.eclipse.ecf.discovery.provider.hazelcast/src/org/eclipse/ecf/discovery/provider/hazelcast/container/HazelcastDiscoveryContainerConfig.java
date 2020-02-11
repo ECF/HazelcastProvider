@@ -58,7 +58,7 @@ public class HazelcastDiscoveryContainerConfig extends DiscoveryContainerConfig 
 			throw new RuntimeException("Cannot config ECF Hazelcast Discovery because config=" + hazelcastConfig
 					+ " does not have either multicast or tcpip enabled in Hazelcast config");
 		}
-		buf.append(host).append(":").append(port).append("/").append(hazelcastConfig.getGroupConfig().getName());
+		buf.append(host).append(":").append(port).append("/").append(hazelcastConfig.getInstanceName());
 		return new URI(buf.toString());
 
 	}

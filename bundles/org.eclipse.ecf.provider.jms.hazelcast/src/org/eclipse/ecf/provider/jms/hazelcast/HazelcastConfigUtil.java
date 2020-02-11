@@ -19,7 +19,6 @@ import org.eclipse.ecf.provider.internal.jms.hazelcast.LogUtility;
 
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.config.Config;
-import com.hazelcast.config.GroupConfig;
 import com.hazelcast.config.NetworkConfig;
 
 public class HazelcastConfigUtil {
@@ -40,13 +39,10 @@ public class HazelcastConfigUtil {
 		while (path != null && path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		GroupConfig groupConfig = hazelcastConfig.getGroupConfig();
-		if (groupConfig != null) {
-			LogUtility.trace("adjustConfig", DebugOptions.CONFIG, HazelcastConfigUtil.class,
-					"Resetting group name on Hazelcast GroupConfig.  Group name was=" + groupConfig.getName()
-							+ " and will be=" + path);
-			groupConfig.setName(path);
-		}
+		LogUtility.trace("adjustConfig", DebugOptions.CONFIG, HazelcastConfigUtil.class,
+				"Resetting cluster name on Hazelcast GroupConfig.  Cluster name was=" + hazelcastConfig.getClusterName()
+						+ " and will be=" + path);
+		hazelcastConfig.setClusterName(path);
 	}
 
 	public static void ajustClientConfig(ClientConfig clientConfig, ID targetID) throws URISyntaxException {
@@ -55,13 +51,10 @@ public class HazelcastConfigUtil {
 		while (path != null && path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		GroupConfig groupConfig = clientConfig.getGroupConfig();
-		if (groupConfig != null) {
-			LogUtility.trace("adjustConfig", DebugOptions.CONFIG, HazelcastConfigUtil.class,
-					"Resetting group name on Hazelcast GroupConfig.  Group name was=" + groupConfig.getName()
-							+ " and will be=" + path);
-			groupConfig.setName(path);
-		}
+		LogUtility.trace("adjustConfig", DebugOptions.CONFIG, HazelcastConfigUtil.class,
+				"Resetting cluster name on Hazelcast GroupConfig.  Cluster name was=" + clientConfig.getClusterName()
+						+ " and will be=" + path);
+		clientConfig.setClusterName(path);
 	}
 
 }
