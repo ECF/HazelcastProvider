@@ -100,7 +100,7 @@ In a *second* Karaf instance (not the same process as the TimeService host) give
     Adding feature url https://download.eclipse.org/rt/ecf/latest/karaf-features.xml
     karaf@root()> feature:repo-add https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
     Adding feature url https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
-    karaf@root()> feature:install ecf-rs-examples-timeservice-consumer
+    karaf@root()> feature:install ecf-rs-examples-timeservice-consumer-async
     karaf@root()> feature:install ecf-rs-hazelcast
 
 After a few seconds to download, install and start bundles, and a few more seconds to discover the exported TimeService in the Hazelcast group, you should see output like this on the consumer, indicating that the remote service was discovered, imported, injected into the example consumer code, which calls the remote service and prints out a result along with the IMPORT_REGISTRATION and imported endpoint-description.
