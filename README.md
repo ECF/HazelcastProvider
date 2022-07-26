@@ -1,4 +1,4 @@
-# Hazelcast OSGi R7 Distribution and Discovery Provider
+# Hazelcast OSGi R7+ Distribution and Discovery Provider
 
 ECF OSGi R7 Remote Services Distribution and Discovery Providers based upon [Hazelcast](http://www.hazelcast.com).
 
