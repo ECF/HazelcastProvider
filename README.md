@@ -26,8 +26,10 @@ This repo holds both a Distribution and Discovery provider that can be plugged i
 
 To install the ECF Remote Services implementation, and the Hazelcast Discovery and Distribution providers:
 
-In one instance of Karaf, type this at the console
+In one instance of Karaf, add these two repos at the console
 
+    karaf@root()> feature:repo-add https://download.eclipse.org/rt/ecf/latest/karaf-features.xml
+    Adding feature url https://download.eclipse.org/rt/ecf/latest/karaf-features.xml
     karaf@root()> feature:repo-add https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
     Adding feature url https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
     
@@ -94,12 +96,14 @@ The above output indicates that the TimeService has been exported.  Also the Haz
 
 In a *second* Karaf instance (not the same process as the TimeService host) give the following Karaf commands:
 
+    karaf@root()> feature:repo-add https://download.eclipse.org/rt/ecf/latest/karaf-features.xml
+    Adding feature url https://download.eclipse.org/rt/ecf/latest/karaf-features.xml
     karaf@root()> feature:repo-add https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
     Adding feature url https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
     karaf@root()> feature:install ecf-rs-examples-timeservice-consumer
     karaf@root()> feature:install ecf-rs-hazelcast
 
-After ~10 seconds to install and start all bundles, and ~10 seconds to discover the exported TimeService in the Hazelcast multicast group, you should see output like this on the consumer, indicating that the remote service was discovered, imported, injected into the example consumer code, which calls the remote service and prints out a result.
+After a few seconds to download, install and start bundles, and a few more seconds to discover the exported TimeService in the Hazelcast group, you should see output like this on the consumer, indicating that the remote service was discovered, imported, injected into the example consumer code, which calls the remote service and prints out a result along with the IMPORT_REGISTRATION and imported endpoint-description.
 
 ```karaf@root()> feature:repo-add https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
 Adding feature url https://raw.githubusercontent.com/ECF/HazelcastProvider/master/build/karaf-features.xml
